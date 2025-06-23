@@ -3,33 +3,23 @@ import {
   RestaurantMenu as RestaurantMenuIcon,
   Settings as SettingsIcon,
   Translate as TranslateIcon,
-} from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Container,
-  Typography,
-} from "@mui/material";
-import { Link } from "react-router-dom";
-import "./Home.scss";
+} from "@mui/icons-material"
+import { Box, Button, Card, CardActions, CardContent, Container, Typography } from "@mui/material"
+import { Link } from "react-router-dom"
+import "./Home.scss"
 
 function Home() {
   const features = [
     {
       title: "食材制限設定",
-      description:
-        "アレルギーや宗教的な食事制限を設定して、安全に日本料理を楽しみましょう",
+      description: "アレルギーや宗教的な食事制限を設定して、安全に日本料理を楽しみましょう",
       icon: <RestaurantMenuIcon sx={{ fontSize: 40 }} />,
       link: "/dietary-restrictions",
       color: "#4caf50",
     },
     {
       title: "メニュースキャン",
-      description:
-        "日本語メニューをスキャンして、食材情報と食べ方を確認しましょう",
+      description: "日本語メニューをスキャンして、食材情報と食べ方を確認しましょう",
       icon: <QrCodeScannerIcon sx={{ fontSize: 40 }} />,
       link: "/menu-scanner",
       color: "#2196f3",
@@ -48,24 +38,15 @@ function Home() {
       link: "/settings",
       color: "#9c27b0",
     },
-  ];
+  ]
 
   return (
     <Container maxWidth="lg" className="home-container">
       <Box sx={{ textAlign: "center", mb: 4 }}>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          className="home-title"
-        >
+        <Typography variant="h3" component="h1" gutterBottom className="home-title">
           日本食ガイド
         </Typography>
-        <Typography
-          variant="h6"
-          color="text.secondary"
-          className="home-subtitle"
-        >
+        <Typography variant="h6" color="text.secondary" className="home-subtitle">
           外国人観光客のための日本料理体験アプリ
         </Typography>
       </Box>
@@ -134,7 +115,7 @@ function Home() {
         </Typography>
       </Box>
     </Container>
-  );
+  )
 }
 
-export default Home;
+export default Home
