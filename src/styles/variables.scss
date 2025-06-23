@@ -1,0 +1,39 @@
+// カラーパレット
+$primary-color: #1976d2;
+$secondary-color: #dc004e;
+$accent-color: #ff6f00;
+$background-color: #f5f5f5;
+$text-color: #333333;
+$light-gray: #f0f0f0;
+$medium-gray: #cccccc;
+$dark-gray: #666666;
+
+// スペーシング
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// ブレークポイント
+$mobile: 480px;
+$tablet: 768px;
+$desktop: 1024px;
+$large-desktop: 1200px;
+
+// フォントサイズ
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-md: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 24px;
+$font-size-xxl: 32px;
+
+// ボーダー
+$border-radius: 4px;
+$border-radius-lg: 8px;
+$border-width: 1px;
+
+// シャドウ
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
