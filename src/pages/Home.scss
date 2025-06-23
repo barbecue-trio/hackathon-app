@@ -1,0 +1,85 @@
+@import "../styles/variables";
+
+.home-container {
+  padding: $spacing-lg;
+
+  .home-title {
+    font-weight: 700;
+    color: $primary-color;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    @media (max-width: $tablet) {
+      font-size: $font-size-xl;
+    }
+  }
+
+  .home-subtitle {
+    color: $text-color;
+    margin-bottom: $spacing-xl;
+  }
+
+  .feature-card {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border: none;
+    border-radius: $border-radius-lg;
+    box-shadow: $box-shadow;
+
+    &:hover {
+      box-shadow: $box-shadow-lg;
+    }
+
+    .MuiCardContent-root {
+      padding: $spacing-lg;
+    }
+
+    .MuiCardActions-root {
+      padding: 0 $spacing-lg $spacing-lg;
+    }
+  }
+
+  .welcome-message {
+    font-weight: 600;
+    color: $primary-color;
+    margin-bottom: $spacing-md;
+  }
+}
+
+// レスポンシブデザイン
+@media (max-width: $mobile) {
+  .home-container {
+    padding: $spacing-md;
+
+    .feature-card {
+      margin-bottom: $spacing-md;
+    }
+  }
+}
+
+// アニメーション
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feature-card {
+  animation: fadeInUp 0.6s ease-out;
+
+  &:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  &:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+}
