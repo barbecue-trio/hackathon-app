@@ -1,18 +1,18 @@
 import {
-  Typography,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Box,
-  Container,
-} from "@mui/material";
-import {
-  RestaurantMenu as RestaurantMenuIcon,
   QrCodeScanner as QrCodeScannerIcon,
+  RestaurantMenu as RestaurantMenuIcon,
   Settings as SettingsIcon,
   Translate as TranslateIcon,
 } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Container,
+  Typography,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import "./Home.scss";
 
@@ -81,9 +81,9 @@ function Home() {
           gap: 3,
         }}
       >
-        {features.map((feature, index) => (
+        {features.map((feature) => (
           <Card
-            key={index}
+            key={feature.title}
             className="feature-card"
             sx={{
               height: "100%",

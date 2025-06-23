@@ -1,37 +1,37 @@
-import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Container,
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  IconButton,
-} from "@mui/material";
-import {
-  Home as HomeIcon,
-  RestaurantMenu as RestaurantMenuIcon,
-  QrCodeScanner as QrCodeScannerIcon,
   Fastfood as FastfoodIcon,
-  Settings as SettingsIcon,
+  Home as HomeIcon,
   MenuBook as MenuBookIcon,
   Menu as MenuIcon,
-} from "@mui/icons-material";
-import { useState } from "react";
-import "./App.css";
-import DietaryRestrictions from "./pages/DietaryRestrictions";
-import Home from "./pages/Home";
-import Menu from "./pages/Menu";
-import MenuDetail from "./pages/MenuDetail";
-import MenuScanner from "./pages/MenuScanner";
-import Settings from "./pages/Settings";
+  QrCodeScanner as QrCodeScannerIcon,
+  RestaurantMenu as RestaurantMenuIcon,
+  Settings as SettingsIcon,
+} from "@mui/icons-material"
+import {
+  AppBar,
+  Box,
+  Container,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+} from "@mui/material"
+import { useState } from "react"
+import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import "./App.css"
+import DietaryRestrictions from "./pages/DietaryRestrictions"
+import Home from "./pages/Home"
+import Menu from "./pages/Menu"
+import MenuDetail from "./pages/MenuDetail"
+import MenuScanner from "./pages/MenuScanner"
+import Settings from "./pages/Settings"
 
 function App() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const menuItems = [
     { text: "Home", path: "/", icon: <HomeIcon /> },
@@ -48,11 +48,11 @@ function App() {
     { text: "Menu", path: "/menu", icon: <FastfoodIcon /> },
     { text: "Menu Detail", path: "/menu-detail", icon: <MenuBookIcon /> },
     { text: "Settings", path: "/settings", icon: <SettingsIcon /> },
-  ];
+  ]
 
   const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+    setDrawerOpen(!drawerOpen)
+  }
 
   return (
     <Router>
@@ -97,10 +97,7 @@ function App() {
           <Box sx={{ mt: 3, mb: 3 }}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route
-                path="/dietary-restrictions"
-                element={<DietaryRestrictions />}
-              />
+              <Route path="/dietary-restrictions" element={<DietaryRestrictions />} />
               <Route path="/menu-scanner" element={<MenuScanner />} />
               <Route path="/menu" element={<Menu />} />
               <Route path="/menu-detail" element={<MenuDetail />} />
@@ -110,7 +107,7 @@ function App() {
         </Container>
       </Box>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
