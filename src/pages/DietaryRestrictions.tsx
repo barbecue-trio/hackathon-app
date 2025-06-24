@@ -10,13 +10,15 @@ import {
 import { Fragment, useState } from "react"
 import { dietaryRestrictionGroups } from "../data/dietaryRestrictionGroups"
 import type { UserDietaryRestrictions } from "../types/dietaryRestrictions"
+import {
+  loadDietaryRestrictions,
+  saveDietaryRestrictions,
+} from "../utils/dietaryRestrictionStorage"
 
 function DietaryRestrictions() {
-  const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<UserDietaryRestrictions>({
-    allergies: [],
-    religiousRestrictions: [],
-    otherRestrictions: [],
-  })
+  const [userDietaryRestrictions, setUserDietaryRestrictions] = useState<UserDietaryRestrictions>(
+    loadDietaryRestrictions()
+  )
 
   const handleToggle = (groupKey: keyof UserDietaryRestrictions, option: string) => {
     setUserDietaryRestrictions((prev) => {
@@ -30,7 +32,7 @@ function DietaryRestrictions() {
   }
 
   const handleSave = () => {
-    localStorage.setItem("dietaryRestrictions", JSON.stringify(userDietaryRestrictions))
+    saveDietaryRestrictions(userDietaryRestrictions)
   }
 
   return (
