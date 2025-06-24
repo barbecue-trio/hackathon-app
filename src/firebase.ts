@@ -1,3 +1,4 @@
+import { GoogleAIBackend, getAI, getGenerativeModel } from "firebase/ai"
 import { getAnalytics } from "firebase/analytics"
 import { initializeApp } from "firebase/app"
 
@@ -13,6 +14,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 const analytics = getAnalytics(app)
+const ai = getAI(app, { backend: new GoogleAIBackend() })
+const modelName = import.meta.env.VITE_FIREBASE_AI_MODEL || "gemini-2.5-flash"
+const model = getGenerativeModel(ai, { model: modelName })
 
 export default app
-export { analytics }
+export { analytics, model }
