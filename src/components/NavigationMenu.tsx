@@ -2,12 +2,16 @@ import { Box, Typography } from "@mui/material";
 import navigationArrowIcon from "../assets/icons/navigation-menu-arrow.svg";
 
 interface NavigationMenuProps {
-  language?: string;
+  title: string;
+  value?: string;
+  showArrow?: boolean;
   onClick?: () => void;
 }
 
 const NavigationMenu = ({
-  language = "English",
+  title,
+  value,
+  showArrow = false,
   onClick,
 }: NavigationMenuProps) => {
   return (
@@ -35,7 +39,7 @@ const NavigationMenu = ({
         transition: "background-color 0.2s ease",
       }}
     >
-      {/* Left side - Language Settings */}
+      {/* Left side - Menu item */}
       <Box
         sx={{
           display: "flex",
@@ -61,67 +65,71 @@ const NavigationMenu = ({
               color: "#121217",
             }}
           >
-            App Language
+            {title}
           </Typography>
         </Box>
+        {value && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "105px",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: "Spline Sans, sans-serif",
+                fontWeight: 400,
+                fontSize: "14px",
+                lineHeight: "1.5em",
+                textAlign: "left",
+                color: "#5E668C",
+              }}
+            >
+              {value}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Right side - Icon */}
+      {showArrow && (
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: "105px",
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily: "Spline Sans, sans-serif",
-              fontWeight: 400,
-              fontSize: "14px",
-              lineHeight: "1.5em",
-              textAlign: "left",
-              color: "#5E668C",
-            }}
-          >
-            {language}
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Right side - Icon */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "stretch",
-          alignItems: "stretch",
-          width: "fit-content",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "24px",
-            height: "100%",
+            justifyContent: "stretch",
+            alignItems: "stretch",
+            width: "fit-content",
           }}
         >
           <Box
             sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
               width: "24px",
-              height: "24px",
-              position: "relative",
+              height: "100%",
             }}
           >
-            <img
-              src={navigationArrowIcon}
-              alt="Navigation arrow"
-              width="24"
-              height="24"
-            />
+            <Box
+              sx={{
+                width: "24px",
+                height: "24px",
+                position: "relative",
+              }}
+            >
+              <img
+                src={navigationArrowIcon}
+                alt="Navigation arrow"
+                width="24"
+                height="24"
+              />
+            </Box>
           </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };
