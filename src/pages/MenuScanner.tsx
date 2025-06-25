@@ -1,10 +1,25 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import Footer from "../components/Footer";
 
 function MenuScanner() {
+  const navigate = useNavigate();
+
+  const handleCameraScan = () => {
+    console.log("Scan with Camera clicked");
+    // カメラスキャン機能を実装後、結果をMenu Analysisページに遷移
+    navigate("/menu");
+  };
+
+  const handleUploadImage = () => {
+    console.log("Upload Image clicked");
+    // 画像アップロード機能を実装後、結果をMenu Analysisページに遷移
+    navigate("/menu");
+  };
+
   return (
     <>
       {/* Main Frame - 390x844 with space-between layout */}
@@ -93,9 +108,7 @@ function MenuScanner() {
                     backgroundColor: "#2A41D0",
                   },
                 }}
-                onClick={() => {
-                  console.log("Scan with Camera clicked");
-                }}
+                onClick={handleCameraScan}
               >
                 Scan with Camera
               </Button>
@@ -116,9 +129,7 @@ function MenuScanner() {
                     backgroundColor: "#C4D5F4",
                   },
                 }}
-                onClick={() => {
-                  console.log("Upload Image clicked");
-                }}
+                onClick={handleUploadImage}
               >
                 Upload Image
               </Button>

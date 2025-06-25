@@ -1,105 +1,162 @@
-import React from "react";
-import { Box, Typography, Container, Stack } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Typography } from "@mui/material";
 import Header from "../components/Header";
 import MenuItem from "../components/MenuItem";
+import CheckItem from "../components/CheckItem";
+import Footer from "../components/Footer";
 // Vite static asset import
-import vegetableTempuraImg from "../assets/images/vegetable-tempura.png";
+import menuItemImg from "../assets/images/menu-item-image.png";
 
 function Menu() {
-  // デバッグ用: 画像パスを確認
-  console.log("Vegetable Tempura Image Path:", vegetableTempuraImg);
+  // Dietary Restrictions state
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<
+    Record<string, boolean>
+  >({
+    Vegetarian: false,
+    "No Pork": false,
+  });
+
+  const handleDietaryChange = (restriction: string, checked: boolean) => {
+    setDietaryRestrictions((prev) => ({
+      ...prev,
+      [restriction]: checked,
+    }));
+  };
 
   const menuItems = [
     {
       title: "Vegetable Tempura",
       ingredients: "Contains: Tofu, Vegetables",
-      imageSrc: vegetableTempuraImg,
+      imageSrc: menuItemImg,
     },
     {
-      title: "Chicken Teriyaki",
-      ingredients: "Contains: Chicken, Soy Sauce, Sugar",
-      imageSrc: "", // プレースホルダー画像なし
+      title: "Vegetable Tempura",
+      ingredients: "Contains: Tofu, Vegetables",
+      imageSrc: menuItemImg,
     },
     {
-      title: "Salmon Sashimi",
-      ingredients: "Contains: Raw Salmon, Wasabi",
-      imageSrc: "", // プレースホルダー画像なし
-    },
-    {
-      title: "Beef Ramen",
-      ingredients: "Contains: Beef, Wheat Noodles, Egg",
-      imageSrc: "", // プレースホルダー画像なし
+      title: "Vegetable Tempura",
+      ingredients: "Contains: Tofu, Vegetables",
+      imageSrc: menuItemImg,
     },
   ];
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        backgroundColor: "#FFFFFF",
         display: "flex",
         flexDirection: "column",
+        justifyContent: "space-between",
+        minHeight: "100vh",
+        backgroundColor: "#FFFFFF",
+        width: "100%",
+        maxWidth: 390,
+        margin: "0 auto",
       }}
     >
-      <Header title="Menu" />
+      {/* Main Content */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          width: "100%",
+        }}
+      >
+        {/* Header */}
+        <Header title="Menu Analysis" />
 
-      <Container maxWidth="sm" sx={{ py: 4 }}>
-        <Stack spacing={3} alignItems="center">
-          {/* ページタイトル */}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              padding: "20px 16px 12px",
-              width: "100%",
-              maxWidth: 390,
-              alignItems: "flex-start",
-            }}
-          >
-            <Typography
-              sx={{
-                fontFamily: '"Spline Sans", "Roboto", sans-serif',
-                fontWeight: 700,
-                fontSize: 22,
-                lineHeight: "1.2727272727272727em",
-                textAlign: "left",
-                color: "#121217",
-                width: "100%",
-              }}
-            >
-              Menu Items
-            </Typography>
-          </Box>
-
-          {/* Menu Items List */}
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: 390,
-              backgroundColor: "#FFFFFF",
-            }}
-          >
-            {menuItems.map((item, index) => (
-              <MenuItem
-                key={index}
-                title={item.title}
-                ingredients={item.ingredients}
-                imageSrc={item.imageSrc}
-              />
-            ))}
-          </Box>
-
-          {/* 説明テキスト */}
+        {/* Dietary Restrictions Section */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "20px 16px 12px",
+            width: "100%",
+          }}
+        >
           <Typography
-            variant="body2"
-            color="text.secondary"
-            textAlign="center"
-            sx={{ maxWidth: 350, mt: 3 }}
+            sx={{
+              fontFamily: '"Spline Sans", "Roboto", sans-serif',
+              fontWeight: 700,
+              fontSize: 22,
+              lineHeight: "1.2727272727272727em",
+              textAlign: "left",
+              color: "#121217",
+              width: "100%",
+            }}
           >
-            各メニューアイテムをタップして詳細情報とアレルギー情報を確認できます。
+            Dietary Restrictions
           </Typography>
-        </Stack>
-      </Container>
+        </Box>
+
+        {/* Dietary Restrictions Check Items */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "0px 16px",
+            width: "100%",
+          }}
+        >
+          {Object.entries(dietaryRestrictions).map(([restriction, checked]) => (
+            <CheckItem
+              key={restriction}
+              label={restriction}
+              checked={checked}
+              onChange={(newChecked) =>
+                handleDietaryChange(restriction, newChecked)
+              }
+            />
+          ))}
+          {/* Additional Vegetarian item as shown in Figma */}
+          <CheckItem label="Vegetarian" checked={false} onChange={() => {}} />
+        </Box>
+
+        {/* Menu Items Section */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "20px 16px 12px",
+            width: "100%",
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"Spline Sans", "Roboto", sans-serif',
+              fontWeight: 700,
+              fontSize: 22,
+              lineHeight: "1.2727272727272727em",
+              textAlign: "left",
+              color: "#121217",
+              width: "100%",
+            }}
+          >
+            Menu Items
+          </Typography>
+        </Box>
+
+        {/* Menu Items List */}
+        <Box
+          sx={{
+            width: "100%",
+            backgroundColor: "#FFFFFF",
+          }}
+        >
+          {menuItems.map((item, index) => (
+            <MenuItem
+              key={index}
+              title={item.title}
+              ingredients={item.ingredients}
+              imageSrc={item.imageSrc}
+            />
+          ))}
+        </Box>
+      </Box>
+
+      {/* Footer */}
+      <Footer />
     </Box>
   );
 }
