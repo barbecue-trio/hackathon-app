@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface MenuItemProps {
   title: string;
@@ -8,8 +9,15 @@ interface MenuItemProps {
 }
 
 function MenuItem({ title, ingredients, imageSrc }: MenuItemProps) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/menu-detail");
+  };
+
   return (
     <Box
+      onClick={handleClick}
       sx={{
         display: "flex",
         flexDirection: "row",
@@ -19,6 +27,10 @@ function MenuItem({ title, ingredients, imageSrc }: MenuItemProps) {
         width: "100%",
         maxWidth: 390,
         backgroundColor: "#FFFFFF",
+        cursor: "pointer",
+        "&:hover": {
+          backgroundColor: "#F8F9FA",
+        },
       }}
     >
       {/* Image area - 56x56px */}
