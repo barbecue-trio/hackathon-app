@@ -1,15 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Container,
-  Card,
-  CardContent,
-  Stack,
-  Button as MuiButton,
-  IconButton,
-} from "@mui/material";
-import { CameraAlt, PhotoLibrary, Upload } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import Footer from "../components/Footer";
@@ -17,94 +7,85 @@ import Footer from "../components/Footer";
 function MenuScanner() {
   return (
     <>
+      {/* Main Frame - 390x844 with space-between layout */}
       <Box
         sx={{
-          minHeight: "100vh",
+          width: "100%",
+          maxWidth: 390,
+          height: "100vh",
           backgroundColor: "#FFFFFF",
           display: "flex",
           flexDirection: "column",
-          paddingBottom: "80px", // Footer用のスペース確保
+          justifyContent: "space-between",
+          margin: "0 auto",
         }}
       >
-        <Header title="Menu Scanner" />
+        {/* Content Area - Column layout with hug content */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignSelf: "stretch",
+            flex: "0 0 auto",
+          }}
+        >
+          {/* Header Component */}
+          <Header title="Menu Scanner" />
 
-        <Container maxWidth="sm" sx={{ py: 4 }}>
-          <Stack spacing={4} alignItems="center">
-            {/* Head1コンポーネント - Figmaデザインに基づく実装 */}
+          {/* Text Content Frame - Center aligned with padding */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              alignSelf: "stretch",
+              padding: "4px 16px 12px",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                fontWeight: 400,
+                fontSize: 16,
+                lineHeight: "1.5em",
+                textAlign: "center",
+                color: "#121217",
+                width: "100%",
+              }}
+            >
+              Scan the menu with your camera or upload an image
+            </Typography>
+          </Box>
+
+          {/* Buttons Container - Stretch layout */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "stretch",
+              alignItems: "stretch",
+              alignSelf: "stretch",
+            }}
+          >
+            {/* Inner Buttons Frame - Column with gap and padding */}
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                padding: "20px 16px 12px",
-                width: "100%",
-                maxWidth: 390,
-                alignItems: "flex-start",
+                gap: "12px",
+                padding: "12px 16px",
+                flex: 1,
               }}
             >
-              <Typography
-                sx={{
-                  fontFamily: '"Spline Sans", "Roboto", sans-serif',
-                  fontWeight: 700,
-                  fontSize: 22,
-                  lineHeight: "1.2727272727272727em",
-                  textAlign: "left",
-                  color: "#121217",
-                  width: "100%",
-                }}
-              >
-                Ramen
-              </Typography>
-            </Box>
-
-            {/* Figmaデザインに基づくText Box */}
-            <Card
-              sx={{
-                width: "100%",
-                maxWidth: 390,
-                backgroundColor: "#f8f9fa",
-                boxShadow: 2,
-              }}
-            >
-              <CardContent
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  padding: "4px 16px 12px",
-                }}
-              >
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontFamily: '"Spline Sans", "Roboto", sans-serif',
-                    fontWeight: 400,
-                    fontSize: 16,
-                    lineHeight: "1.5em",
-                    textAlign: "center",
-                    color: "#121217",
-                    width: "100%",
-                  }}
-                >
-                  Scan the menu with your camera or upload an image
-                </Typography>
-              </CardContent>
-            </Card>
-
-            {/* Figma Primary Color Button - Scan with Camera */}
-            <Box
-              sx={{
-                width: "100%",
-                maxWidth: 390,
-                display: "flex",
-                justifyContent: "center",
-                padding: "0 16px",
-              }}
-            >
+              {/* Primary Button - Scan with Camera */}
               <Button
                 variant="primary"
                 sx={{
                   backgroundColor: "#4263FA",
                   color: "#FFFFFF",
+                  width: "358px",
+                  height: "48px",
+                  borderRadius: "24px",
                   "&:hover": {
                     backgroundColor: "#3651E6",
                   },
@@ -113,71 +94,41 @@ function MenuScanner() {
                   },
                 }}
                 onClick={() => {
-                  // カメラ機能の実装予定
                   console.log("Scan with Camera clicked");
                 }}
               >
                 Scan with Camera
               </Button>
-            </Box>
 
-            {/* ギャラリーとアップロード機能のボタン */}
-            <Stack
-              direction="row"
-              spacing={3}
-              sx={{
-                width: "100%",
-                maxWidth: 390,
-                justifyContent: "center",
-              }}
-            >
+              {/* Secondary Button - Upload Image */}
               <Button
                 variant="secondary"
                 sx={{
-                  flex: 1,
-                  py: 2,
-                  borderRadius: 2,
-                  width: "auto",
-                }}
-              >
-                📷 ギャラリーから選択
-              </Button>
-            </Stack>
-
-            {/* 追加のアップロードボタン */}
-            <Box sx={{ width: "100%", maxWidth: 390 }}>
-              <Button
-                variant="text"
-                sx={{
-                  width: "100%",
-                  py: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f5f5f5",
+                  backgroundColor: "#E8EDFA",
+                  color: "#121217",
+                  width: "358px",
+                  height: "48px",
+                  borderRadius: "24px",
                   "&:hover": {
-                    backgroundColor: "#eeeeee",
+                    backgroundColor: "#D6E1F7",
+                  },
+                  "&:active": {
+                    backgroundColor: "#C4D5F4",
                   },
                 }}
+                onClick={() => {
+                  console.log("Upload Image clicked");
+                }}
               >
-                ファイルをアップロード
+                Upload Image
               </Button>
             </Box>
+          </Box>
+        </Box>
 
-            {/* ヘルプテキスト */}
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              textAlign="center"
-              sx={{ maxWidth: 350 }}
-            >
-              メニューの写真を撮影またはアップロードして、食材情報を自動解析します。
-              アレルギーや宗教的制約に基づいて安全性をチェックできます。
-            </Typography>
-          </Stack>
-        </Container>
+        {/* Footer - Fixed at bottom */}
+        <Footer />
       </Box>
-
-      {/* Footer - 固定配置 */}
-      <Footer />
     </>
   );
 }
