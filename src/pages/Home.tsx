@@ -10,36 +10,11 @@ function Home() {
     navigate("/dietary-restrictions");
   };
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        width: "390px",
-        height: "844px",
-        backgroundColor: "#FFFFFF",
-        margin: "0 auto",
-        position: "relative",
-      }}
-    >
-      {/* Main content area */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-        }}
-      >
-        {/* Eyecatch Image */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "stretch",
-            alignItems: "stretch",
-            flex: 1,
-          }}
-        >
+    <Box className="app-container">
+      <Box className="page-container">
+        {/* Main content area */}
+        <Box className="main-content with-footer">
+          {/* Eyecatch Image */}
           <Box
             sx={{
               display: "flex",
@@ -47,6 +22,10 @@ function Home() {
               justifyContent: "stretch",
               alignItems: "stretch",
               flex: 1,
+              minHeight: {
+                xs: "40vh",
+                sm: "50vh",
+              },
             }}
           >
             <Box
@@ -58,76 +37,76 @@ function Home() {
                 backgroundColor: "#FFFFFF",
                 flex: 1,
                 width: "100%",
+                minHeight: "inherit",
               }}
             />
           </Box>
-        </Box>
 
-        {/* Title Section */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "20px 16px 12px",
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily: '"Spline Sans", "Roboto", sans-serif',
-              fontWeight: 700,
-              fontSize: "28px",
-              lineHeight: "1.25em",
-              textAlign: "center",
-              color: "#121217",
-              width: "100%",
-            }}
-          >
-            Menu Scanner for International Visitors
-          </Typography>
-        </Box>
-
-        {/* Description Section */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "4px 16px 12px",
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily: '"Spline Sans", "Roboto", sans-serif',
-              fontWeight: 400,
-              fontSize: "16px",
-              lineHeight: "1.5em",
-              textAlign: "center",
-              color: "#121217",
-              width: "100%",
-            }}
-          >
-            Enjoy meals at restaurants in Japan with ease. Register, log in, or
-            use the app as a guest.
-          </Typography>
-        </Box>
-
-        {/* Button Section */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "stretch",
-            alignItems: "stretch",
-          }}
-        >
+          {/* Title Section */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: "12px",
-              padding: "12px 16px",
-              width: "100%",
               alignItems: "center",
+              padding: {
+                xs: "16px 16px 12px",
+                sm: "20px 20px 12px",
+              },
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                fontWeight: 700,
+                fontSize: {
+                  xs: "24px",
+                  sm: "28px",
+                },
+                lineHeight: "1.25em",
+                textAlign: "center",
+                color: "#121217",
+                width: "100%",
+                maxWidth: "100%",
+                wordBreak: "break-word",
+              }}
+            >
+              Menu Scanner for International Visitors
+            </Typography>
+          </Box>
+
+          {/* Description Section */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              padding: "4px 16px 12px",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                fontWeight: 400,
+                fontSize: "16px",
+                lineHeight: "1.5em",
+                textAlign: "center",
+                color: "#121217",
+                width: "100%",
+                maxWidth: "100%",
+              }}
+            >
+              Enjoy meals at restaurants in Japan with ease. Register, log in,
+              or use the app as a guest.
+            </Typography>
+          </Box>
+
+          {/* Button Section */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "stretch",
+              padding: "12px 16px",
             }}
           >
             <Button
@@ -136,16 +115,17 @@ function Home() {
               sx={{
                 width: "100%",
                 maxWidth: "358px",
+                minHeight: "48px",
               }}
             >
               Register
             </Button>
           </Box>
         </Box>
-      </Box>
 
-      {/* Footer */}
-      <Footer />
+        {/* Footer */}
+        <Footer />
+      </Box>
     </Box>
   );
 }
