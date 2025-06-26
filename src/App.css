@@ -40,3 +40,158 @@
 .read-the-docs {
   color: #888;
 }
+
+/* モバイルファーストのアプリレイアウト */
+.app-container {
+  width: 100%;
+  max-width: 425px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background-color: #ffffff;
+  position: relative;
+  overflow-x: hidden;
+
+  /* デスクトップでの表示改善 */
+  @media (min-width: 426px) {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-left: 1px solid #f0f0f0;
+    border-right: 1px solid #f0f0f0;
+  }
+}
+
+/* ページコンテナの基本レイアウト */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: #ffffff;
+  position: relative;
+}
+
+/* メインコンテンツエリア */
+.main-content {
+  flex: 1;
+  width: 100%;
+  padding-top: 72px; /* Headerの高さ分確保（セーフエリア込み） */
+  padding-bottom: 80px; /* フッターの高さ分確保 */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* レスポンシブ対応のHeader高さ調整 */
+  @media (min-width: 375px) and (max-width: 390px) {
+    padding-top: 76px; /* 少し大きめのHeader対応 */
+  }
+
+  @media (min-width: 391px) and (max-width: 425px) {
+    padding-top: 78px; /* 更に大きめのHeader対応 */
+  }
+
+  @media (min-width: 425px) {
+    padding-top: 80px; /* 最大サイズのHeader対応 */
+  }
+}
+
+/* フッターありページのレイアウト調整 */
+.main-content.with-footer {
+  padding-bottom: 100px; /* フッター + セーフエリア */
+}
+
+/* Dietary Restrictions ページのスクロール領域改善 */
+.main-content.dietary-restrictions {
+  padding-bottom: 120px; /* より広いスクロール領域確保 */
+  min-height: calc(100vh - 180px); /* Header + Footer分を差し引いた最小高さ */
+
+  /* レスポンシブ対応 */
+  @media (min-width: 375px) and (max-width: 390px) {
+    padding-bottom: 125px;
+    min-height: calc(100vh - 185px);
+  }
+
+  @media (min-width: 391px) and (max-width: 425px) {
+    padding-bottom: 130px;
+    min-height: calc(100vh - 190px);
+  }
+
+  @media (min-width: 425px) {
+    padding-bottom: 135px;
+    min-height: calc(100vh - 195px);
+  }
+}
+
+/* セーフエリア対応 */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* レスポンシブ画像 */
+.responsive-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+/* ローディング状態 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+/* エラー状態 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+  color: #e53e3e;
+}
+
+/* タッチフレンドリーな最小タップエリア */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* スクロール可能エリア */
+.scrollable {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* 横スクロール防止 */
+.no-horizontal-scroll {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* 425px対応の追加スタイル */
+@media (min-width: 391px) and (max-width: 425px) {
+  .app-container {
+    /* 391px-425px範囲での最適化 */
+    padding: 0 8px; /* 少し余白を追加 */
+  }
+}

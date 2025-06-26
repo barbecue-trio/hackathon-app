@@ -1,39 +1,160 @@
 // カラーパレット
 $primary-color: #1976d2;
+$figma-primary-color: #4263fa; // Figma Primary Color Button
 $secondary-color: #dc004e;
 $accent-color: #ff6f00;
-$background-color: #f5f5f5;
-$text-color: #333333;
+$background-color: #ffffff;
+$text-color: #121217;
 $light-gray: #f0f0f0;
 $medium-gray: #cccccc;
 $dark-gray: #666666;
 
-// スペーシング
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 16px;
-$spacing-lg: 24px;
-$spacing-xl: 32px;
+// Material UI準拠カラー
+$success-color: #38a169;
+$warning-color: #d69e2e;
+$error-color: #e53e3e;
+$info-color: #3182ce;
 
-// ブレークポイント
-$mobile: 480px;
+// モバイルファーストブレークポイント
+$mobile-s: 320px;
+$mobile-m: 375px;
+$mobile-l: 390px; // Figmaデザインベース
+$mobile-xl: 425px; // スマートフォンサイズ上限
 $tablet: 768px;
 $desktop: 1024px;
-$large-desktop: 1200px;
+$desktop-l: 1440px;
 
-// フォントサイズ
+// コンテナ幅
+$container-mobile: 100%;
+$container-tablet: 768px;
+$container-desktop: 1024px;
+$container-max: 425px; // アプリの最大幅（スマホサイズ上限）
+
+// モバイルファーストスペーシング
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-xxl: 24px;
+$spacing-3xl: 32px;
+
+// Figmaデザイン準拠スペーシング
+$figma-padding-sm: 4px;
+$figma-padding-md: 12px;
+$figma-padding-lg: 16px;
+$figma-padding-xl: 20px;
+
+// フォントサイズ（モバイル最適化）
 $font-size-xs: 12px;
 $font-size-sm: 14px;
 $font-size-md: 16px;
 $font-size-lg: 18px;
-$font-size-xl: 24px;
-$font-size-xxl: 32px;
+$font-size-xl: 22px; // Figma Head1
+$font-size-xxl: 28px; // Figma大見出し
+$font-size-3xl: 32px;
+
+// 行間
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.6;
+$line-height-figma-head1: 1.2727em; // Figma Head1準拠
 
 // ボーダー
-$border-radius: 4px;
-$border-radius-lg: 8px;
-$border-width: 1px;
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 24px; // Figma Button準拠
+$border-width-thin: 1px;
+$border-width-medium: 2px;
 
-// シャドウ
-$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-$box-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
+// シャドウ（モバイル最適化）
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
+$shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+// Z-index階層
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// アニメーション
+$transition-fast: 0.1s ease;
+$transition-normal: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+// タッチターゲット
+$touch-target-min: 44px;
+$button-height-sm: 36px;
+$button-height-md: 48px; // Figma Button準拠
+$button-height-lg: 56px;
+
+// セーフエリア
+$safe-area-top: env(safe-area-inset-top);
+$safe-area-bottom: env(safe-area-inset-bottom);
+$safe-area-left: env(safe-area-inset-left);
+$safe-area-right: env(safe-area-inset-right);
+
+// ミックスイン
+@mixin mobile-only {
+  @media (max-width: #{$mobile-xl}) {
+    @content;
+  }
+}
+
+@mixin mobile-up {
+  @media (min-width: #{$mobile-xl + 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: #{$tablet}) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: #{$desktop}) {
+    @content;
+  }
+}
+
+@mixin touch-target {
+  min-height: $touch-target-min;
+  min-width: $touch-target-min;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin safe-area-padding {
+  padding-top: $safe-area-top;
+  padding-bottom: $safe-area-bottom;
+  padding-left: $safe-area-left;
+  padding-right: $safe-area-right;
+}
+
+// 425px対応ミックスイン
+@mixin mobile-small {
+  @media (max-width: #{$mobile-m}) {
+    @content;
+  }
+}
+
+@mixin mobile-medium {
+  @media (min-width: #{$mobile-m + 1px}) and (max-width: #{$mobile-l}) {
+    @content;
+  }
+}
+
+@mixin mobile-large {
+  @media (min-width: #{$mobile-l + 1px}) and (max-width: #{$mobile-xl}) {
+    @content;
+  }
+}
