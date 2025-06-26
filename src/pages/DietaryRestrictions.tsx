@@ -64,37 +64,29 @@ function DietaryRestrictions() {
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          minHeight: "100vh",
-          backgroundColor: "#FFFFFF",
-          display: "flex",
-          flexDirection: "column",
-          width: "100%",
-          maxWidth: "390px",
-          margin: "0 auto",
-          paddingBottom: "80px", // Footer用のスペース確保
-        }}
-      >
+    <Box className="app-container">
+      <Box className="page-container">
         {/* Header */}
         <Header title="Dietary Restrictions" />
 
         {/* Main Content */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            width: "100%",
-          }}
-        >
+        <Box className="main-content with-footer dietary-restrictions scrollable">
           {/* Allergies Section */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              padding: "16px 16px 8px",
+              padding: {
+                xs: "16px 16px 8px", // 320px-424px
+                sm: "20px 20px 12px", // 425px以上
+              },
+              // 段階的調整
+              "@media (min-width: 375px) and (max-width: 390px)": {
+                padding: "18px 18px 10px",
+              },
+              "@media (min-width: 391px) and (max-width: 425px)": {
+                padding: "19px 19px 11px",
+              },
               width: "100%",
             }}
           >
@@ -102,7 +94,17 @@ function DietaryRestrictions() {
               sx={{
                 fontFamily: '"Spline Sans", "Roboto", sans-serif',
                 fontWeight: 700,
-                fontSize: "18px",
+                fontSize: {
+                  xs: "18px", // 320px-424px
+                  sm: "20px", // 425px以上
+                },
+                // 段階的調整
+                "@media (min-width: 375px) and (max-width: 390px)": {
+                  fontSize: "18.5px",
+                },
+                "@media (min-width: 391px) and (max-width: 425px)": {
+                  fontSize: "19px",
+                },
                 lineHeight: "1.2777777777777777em",
                 textAlign: "left",
                 color: "#121217",
@@ -118,7 +120,17 @@ function DietaryRestrictions() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              padding: "0px 16px",
+              padding: {
+                xs: "0px 16px", // 320px-424px
+                sm: "0px 20px", // 425px以上
+              },
+              // 段階的調整
+              "@media (min-width: 375px) and (max-width: 390px)": {
+                padding: "0px 18px",
+              },
+              "@media (min-width: 391px) and (max-width: 425px)": {
+                padding: "0px 19px",
+              },
               width: "100%",
             }}
           >
@@ -139,7 +151,17 @@ function DietaryRestrictions() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              padding: "16px 16px 8px",
+              padding: {
+                xs: "16px 16px 8px", // 320px-424px
+                sm: "20px 20px 12px", // 425px以上
+              },
+              // 段階的調整
+              "@media (min-width: 375px) and (max-width: 390px)": {
+                padding: "18px 18px 10px",
+              },
+              "@media (min-width: 391px) and (max-width: 425px)": {
+                padding: "19px 19px 11px",
+              },
               width: "100%",
             }}
           >
@@ -147,7 +169,17 @@ function DietaryRestrictions() {
               sx={{
                 fontFamily: '"Spline Sans", "Roboto", sans-serif',
                 fontWeight: 700,
-                fontSize: "18px",
+                fontSize: {
+                  xs: "18px", // 320px-424px
+                  sm: "20px", // 425px以上
+                },
+                // 段階的調整
+                "@media (min-width: 375px) and (max-width: 390px)": {
+                  fontSize: "18.5px",
+                },
+                "@media (min-width: 391px) and (max-width: 425px)": {
+                  fontSize: "19px",
+                },
                 lineHeight: "1.2777777777777777em",
                 textAlign: "left",
                 color: "#121217",
@@ -163,7 +195,17 @@ function DietaryRestrictions() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              padding: "0px 16px",
+              padding: {
+                xs: "0px 16px", // 320px-424px
+                sm: "0px 20px", // 425px以上
+              },
+              // 段階的調整
+              "@media (min-width: 375px) and (max-width: 390px)": {
+                padding: "0px 18px",
+              },
+              "@media (min-width: 391px) and (max-width: 425px)": {
+                padding: "0px 19px",
+              },
               width: "100%",
             }}
           >
@@ -186,7 +228,17 @@ function DietaryRestrictions() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              padding: "16px 16px 8px",
+              padding: {
+                xs: "16px 16px 8px", // 320px-424px
+                sm: "20px 20px 12px", // 425px以上
+              },
+              // 段階的調整
+              "@media (min-width: 375px) and (max-width: 390px)": {
+                padding: "18px 18px 10px",
+              },
+              "@media (min-width: 391px) and (max-width: 425px)": {
+                padding: "19px 19px 11px",
+              },
               width: "100%",
             }}
           >
@@ -194,7 +246,17 @@ function DietaryRestrictions() {
               sx={{
                 fontFamily: '"Spline Sans", "Roboto", sans-serif',
                 fontWeight: 700,
-                fontSize: "18px",
+                fontSize: {
+                  xs: "18px", // 320px-424px
+                  sm: "20px", // 425px以上
+                },
+                // 段階的調整
+                "@media (min-width: 375px) and (max-width: 390px)": {
+                  fontSize: "18.5px",
+                },
+                "@media (min-width: 391px) and (max-width: 425px)": {
+                  fontSize: "19px",
+                },
                 lineHeight: "1.2777777777777777em",
                 textAlign: "left",
                 color: "#121217",
@@ -210,7 +272,17 @@ function DietaryRestrictions() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              padding: "0px 16px",
+              padding: {
+                xs: "0px 16px", // 320px-424px
+                sm: "0px 20px", // 425px以上
+              },
+              // 段階的調整
+              "@media (min-width: 375px) and (max-width: 390px)": {
+                padding: "0px 18px",
+              },
+              "@media (min-width: 391px) and (max-width: 425px)": {
+                padding: "0px 19px",
+              },
               width: "100%",
             }}
           >
@@ -226,33 +298,53 @@ function DietaryRestrictions() {
             ))}
           </Box>
 
-          {/* Save Button Section */}
+          {/* Save Button */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: "row",
-              padding: "12px 16px",
+              justifyContent: "center",
+              padding: {
+                xs: "24px 16px 32px", // 320px-424px (下部余白を増加)
+                sm: "28px 20px 36px", // 425px以上
+              },
+              // 段階的調整
+              "@media (min-width: 375px) and (max-width: 390px)": {
+                padding: "26px 18px 34px",
+              },
+              "@media (min-width: 391px) and (max-width: 425px)": {
+                padding: "27px 19px 35px",
+              },
               width: "100%",
             }}
           >
-            <Button variant="primary" onClick={handleSave}>
-              Save
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              sx={{
+                backgroundColor: "#4263FA",
+                color: "#FFFFFF",
+                width: "100%",
+                maxWidth: {
+                  xs: "358px", // 320px-424px
+                  sm: "380px", // 425px以上
+                },
+                "&:hover": {
+                  backgroundColor: "#3651E6",
+                },
+                "&:active": {
+                  backgroundColor: "#2A41D0",
+                },
+              }}
+            >
+              Save Preferences
             </Button>
           </Box>
-
-          {/* Spacer */}
-          <Box
-            sx={{
-              height: "20px",
-              width: "100%",
-            }}
-          />
         </Box>
-      </Box>
 
-      {/* Footer - 固定配置 */}
-      <Footer />
-    </>
+        {/* Footer */}
+        <Footer />
+      </Box>
+    </Box>
   );
 }
 

@@ -5,119 +5,165 @@ import Footer from "../components/Footer";
 
 function Settings() {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        width: "100%",
-        maxWidth: "390px",
-        height: "844px",
-        margin: "0 auto",
-        backgroundColor: "#FFFFFF",
-      }}
-    >
-      {/* Main content container */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignSelf: "stretch",
-          flex: 1,
-        }}
-      >
+    <Box className="app-container">
+      <Box className="page-container">
         {/* Header */}
         <Header title="Settings" />
 
-        {/* Preferences Block */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignSelf: "stretch",
-            gap: "10px",
-          }}
-        >
-          {/* Preferences Section Title */}
+        {/* Main content container */}
+        <Box className="main-content with-footer scrollable">
+          {/* Preferences Block */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              alignSelf: "stretch",
-              padding: "20px 16px 12px",
+              width: "100%",
+              gap: "10px",
             }}
           >
-            <Typography
+            {/* Preferences Section Title */}
+            <Box
               sx={{
-                fontFamily: "Spline Sans, sans-serif",
-                fontWeight: 700,
-                fontSize: "22px",
-                lineHeight: "1.2727272727272727em",
-                textAlign: "left",
-                color: "#121217",
+                display: "flex",
+                flexDirection: "column",
+                padding: {
+                  xs: "16px 16px 12px",
+                  sm: "20px 16px 12px",
+                },
                 width: "100%",
               }}
             >
-              Preferences
-            </Typography>
+              <Typography
+                sx={{
+                  fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                  fontWeight: 700,
+                  fontSize: {
+                    xs: "20px",
+                    sm: "22px",
+                  },
+                  lineHeight: "1.2727272727272727em",
+                  textAlign: "left",
+                  color: "#121217",
+                  width: "100%",
+                }}
+              >
+                Preferences
+              </Typography>
+            </Box>
+
+            {/* App Language Navigation Menu */}
+            <NavigationMenu
+              title="App Language"
+              value="English"
+              showArrow={true}
+            />
+
+            {/* Currency Navigation Menu */}
+            <NavigationMenu
+              title="Currency"
+              value="Japanese Yen"
+              showArrow={true}
+            />
           </Box>
 
-          {/* App Language Navigation Menu */}
-          <NavigationMenu
-            title="App Language"
-            value="English"
-            showArrow={true}
-          />
-
-          {/* Currency Navigation Menu */}
-          <NavigationMenu
-            title="Currency"
-            value="Japanese Yes"
-            showArrow={true}
-          />
-        </Box>
-
-        {/* Account Block */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignSelf: "stretch",
-            gap: "10px",
-            padding: "10px",
-          }}
-        >
-          {/* Account Section Title */}
+          {/* Account Block */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              alignSelf: "stretch",
-              padding: "20px 16px 12px",
+              width: "100%",
+              gap: "10px",
+              padding: "10px 0",
             }}
           >
-            <Typography
+            {/* Account Section Title */}
+            <Box
               sx={{
-                fontFamily: "Spline Sans, sans-serif",
-                fontWeight: 700,
-                fontSize: "22px",
-                lineHeight: "1.2727272727272727em",
-                textAlign: "left",
-                color: "#121217",
+                display: "flex",
+                flexDirection: "column",
+                padding: {
+                  xs: "16px 16px 12px",
+                  sm: "20px 16px 12px",
+                },
                 width: "100%",
               }}
             >
-              Account
-            </Typography>
+              <Typography
+                sx={{
+                  fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                  fontWeight: 700,
+                  fontSize: {
+                    xs: "20px",
+                    sm: "22px",
+                  },
+                  lineHeight: "1.2727272727272727em",
+                  textAlign: "left",
+                  color: "#121217",
+                  width: "100%",
+                }}
+              >
+                Account
+              </Typography>
+            </Box>
+
+            {/* Manage Account Navigation Menu */}
+            <NavigationMenu title="Manage Account" showArrow={true} />
           </Box>
 
-          {/* Manage Account Navigation Menu */}
-          <NavigationMenu title="Manage Account" showArrow={true} />
+          {/* Help & Support Block */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              gap: "10px",
+              padding: "10px 0",
+            }}
+          >
+            {/* Help Section Title */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                padding: {
+                  xs: "16px 16px 12px",
+                  sm: "20px 16px 12px",
+                },
+                width: "100%",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                  fontWeight: 700,
+                  fontSize: {
+                    xs: "20px",
+                    sm: "22px",
+                  },
+                  lineHeight: "1.2727272727272727em",
+                  textAlign: "left",
+                  color: "#121217",
+                  width: "100%",
+                }}
+              >
+                Help & Support
+              </Typography>
+            </Box>
+
+            {/* Help Center Navigation Menu */}
+            <NavigationMenu title="Help Center" showArrow={true} />
+
+            {/* Contact Us Navigation Menu */}
+            <NavigationMenu title="Contact Us" showArrow={true} />
+
+            {/* Privacy Policy Navigation Menu */}
+            <NavigationMenu title="Privacy Policy" showArrow={true} />
+          </Box>
         </Box>
+
+        {/* Footer */}
+        <Footer />
       </Box>
-
-      {/* Footer */}
-      <Footer />
     </Box>
   );
 }
