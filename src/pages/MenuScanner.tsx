@@ -1,9 +1,9 @@
-import React from "react";
 import { Box, Typography } from "@mui/material";
+
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
 import Button from "../components/Button";
 import Footer from "../components/Footer";
+import Header from "../components/Header";
 
 function MenuScanner() {
   const navigate = useNavigate();

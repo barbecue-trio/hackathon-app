@@ -1,9 +1,9 @@
-import { Box, Typography } from "@mui/material";
-import { useState } from "react";
-import Header from "../components/Header";
-import CheckItem from "../components/CheckItem";
-import Button from "../components/Button";
-import Footer from "../components/Footer";
+import { Box, Typography } from "@mui/material"
+import { useState } from "react"
+import Button from "../components/Button"
+import CheckItem from "../components/CheckItem"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
 
 function DietaryRestrictions() {
   const [allergies, setAllergies] = useState<Record<string, boolean>>({
@@ -17,51 +17,47 @@ function DietaryRestrictions() {
     "Tree nuts": false,
     Soybeans: false,
     Sesame: false,
-  });
+  })
 
-  const [religiousRestrictions, setReligiousRestrictions] = useState<
-    Record<string, boolean>
-  >({
+  const [religiousRestrictions, setReligiousRestrictions] = useState<Record<string, boolean>>({
     Halal: false,
     Kosher: false,
     Vegetarian: false,
-  });
+  })
 
-  const [otherRestrictions, setOtherRestrictions] = useState<
-    Record<string, boolean>
-  >({
+  const [otherRestrictions, setOtherRestrictions] = useState<Record<string, boolean>>({
     Vegan: false,
     "Gluten-free": false,
     "Low-carb": false,
-  });
+  })
 
   const handleAllergyChange = (allergen: string, checked: boolean) => {
     setAllergies((prev) => ({
       ...prev,
       [allergen]: checked,
-    }));
-  };
+    }))
+  }
 
   const handleReligiousChange = (restriction: string, checked: boolean) => {
     setReligiousRestrictions((prev) => ({
       ...prev,
       [restriction]: checked,
-    }));
-  };
+    }))
+  }
 
   const handleOtherChange = (restriction: string, checked: boolean) => {
     setOtherRestrictions((prev) => ({
       ...prev,
       [restriction]: checked,
-    }));
-  };
+    }))
+  }
 
   const handleSave = () => {
     // TODO: Save dietary restrictions
-    console.log("Allergies:", allergies);
-    console.log("Religious Restrictions:", religiousRestrictions);
-    console.log("Other Restrictions:", otherRestrictions);
-  };
+    console.log("Allergies:", allergies)
+    console.log("Religious Restrictions:", religiousRestrictions)
+    console.log("Other Restrictions:", otherRestrictions)
+  }
 
   return (
     <Box className="app-container">
@@ -139,9 +135,7 @@ function DietaryRestrictions() {
                 key={allergen}
                 label={allergen}
                 checked={checked}
-                onChange={(newChecked) =>
-                  handleAllergyChange(allergen, newChecked)
-                }
+                onChange={(newChecked) => handleAllergyChange(allergen, newChecked)}
               />
             ))}
           </Box>
@@ -209,18 +203,14 @@ function DietaryRestrictions() {
               width: "100%",
             }}
           >
-            {Object.entries(religiousRestrictions).map(
-              ([restriction, checked]) => (
-                <CheckItem
-                  key={restriction}
-                  label={restriction}
-                  checked={checked}
-                  onChange={(newChecked) =>
-                    handleReligiousChange(restriction, newChecked)
-                  }
-                />
-              )
-            )}
+            {Object.entries(religiousRestrictions).map(([restriction, checked]) => (
+              <CheckItem
+                key={restriction}
+                label={restriction}
+                checked={checked}
+                onChange={(newChecked) => handleReligiousChange(restriction, newChecked)}
+              />
+            ))}
           </Box>
 
           {/* Other Restrictions Section */}
@@ -291,9 +281,7 @@ function DietaryRestrictions() {
                 key={restriction}
                 label={restriction}
                 checked={checked}
-                onChange={(newChecked) =>
-                  handleOtherChange(restriction, newChecked)
-                }
+                onChange={(newChecked) => handleOtherChange(restriction, newChecked)}
               />
             ))}
           </Box>
@@ -345,7 +333,7 @@ function DietaryRestrictions() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default DietaryRestrictions;
+export default DietaryRestrictions

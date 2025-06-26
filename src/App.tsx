@@ -1,11 +1,11 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import "./App.css";
-import DietaryRestrictions from "./pages/DietaryRestrictions";
-import Home from "./pages/Home";
-import Menu from "./pages/Menu";
-import MenuDetail from "./pages/MenuDetail";
-import MenuScanner from "./pages/MenuScanner";
-import Settings from "./pages/Settings";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import "./App.css"
+import DietaryRestrictions from "./pages/DietaryRestrictions"
+import Home from "./pages/Home"
+import Menu from "./pages/Menu"
+import MenuDetail from "./pages/MenuDetail"
+import MenuScanner from "./pages/MenuScanner"
+import Settings from "./pages/Settings"
 
 function AppContent() {
   return (
@@ -17,7 +17,7 @@ function AppContent() {
       <Route path="/menu-detail" element={<MenuDetail />} />
       <Route path="/settings" element={<Settings />} />
     </Routes>
-  );
+  )
 }
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
     <Router>
       <AppContent />
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App

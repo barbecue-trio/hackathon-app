@@ -1,11 +1,11 @@
-import React, { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import Header from "../components/Header";
-import MenuItem from "../components/MenuItem";
-import CheckItem from "../components/CheckItem";
-import Footer from "../components/Footer";
+import { useState } from "react";
 // Vite static asset import
 import menuItemImg from "../assets/images/menu-item-image.png";
+import CheckItem from "../components/CheckItem";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
+import MenuItem from "../components/MenuItem";
 
 function Menu() {
   // Dietary Restrictions state
@@ -143,7 +143,7 @@ function Menu() {
           >
             {menuItems.map((item, index) => (
               <MenuItem
-                key={index}
+                key={`${item.title}-${index}`}
                 title={item.title}
                 ingredients={item.ingredients}
                 imageSrc={item.imageSrc}

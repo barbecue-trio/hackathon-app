@@ -1,19 +1,14 @@
-import { Box, Typography } from "@mui/material";
-import navigationArrowIcon from "../assets/icons/navigation-menu-arrow.svg";
+import { Box, Typography } from "@mui/material"
+import navigationArrowIcon from "../assets/icons/navigation-menu-arrow.svg"
 
 interface NavigationMenuProps {
-  title: string;
-  value?: string;
-  showArrow?: boolean;
-  onClick?: () => void;
+  title: string
+  value?: string
+  showArrow?: boolean
+  onClick?: () => void
 }
 
-const NavigationMenu = ({
-  title,
-  value,
-  showArrow = false,
-  onClick,
-}: NavigationMenuProps) => {
+const NavigationMenu = ({ title, value, showArrow = false, onClick }: NavigationMenuProps) => {
   return (
     <Box
       onClick={onClick}
@@ -120,18 +115,13 @@ const NavigationMenu = ({
                 position: "relative",
               }}
             >
-              <img
-                src={navigationArrowIcon}
-                alt="Navigation arrow"
-                width="24"
-                height="24"
-              />
+              <img src={navigationArrowIcon} alt="Navigation arrow" width="24" height="24" />
             </Box>
           </Box>
         </Box>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default NavigationMenu;
+export default NavigationMenu

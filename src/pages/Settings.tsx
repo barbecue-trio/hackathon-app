@@ -1,7 +1,7 @@
-import { Box, Typography } from "@mui/material";
-import Header from "../components/Header";
-import NavigationMenu from "../components/NavigationMenu";
-import Footer from "../components/Footer";
+import { Box, Typography } from "@mui/material"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
+import NavigationMenu from "../components/NavigationMenu"
 
 function Settings() {
   return (
@@ -52,18 +52,10 @@ function Settings() {
             </Box>
 
             {/* App Language Navigation Menu */}
-            <NavigationMenu
-              title="App Language"
-              value="English"
-              showArrow={true}
-            />
+            <NavigationMenu title="App Language" value="English" showArrow={true} />
 
             {/* Currency Navigation Menu */}
-            <NavigationMenu
-              title="Currency"
-              value="Japanese Yen"
-              showArrow={true}
-            />
+            <NavigationMenu title="Currency" value="Japanese Yen" showArrow={true} />
           </Box>
 
           {/* Account Block */}
@@ -165,7 +157,7 @@ function Settings() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default Settings;
+export default Settings

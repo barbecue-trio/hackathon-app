@@ -1,18 +1,14 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
+import CheckIcon from "@mui/icons-material/Check"
+import { Box, Typography } from "@mui/material"
+import type React from "react"
 
 interface DietaryItemProps {
-  label: string;
-  isSelected?: boolean;
-  onClick?: () => void;
+  label: string
+  isSelected?: boolean
+  onClick?: () => void
 }
 
-const DietaryItem: React.FC<DietaryItemProps> = ({
-  label,
-  isSelected = false,
-  onClick,
-}) => {
+const DietaryItem: React.FC<DietaryItemProps> = ({ label, isSelected = false, onClick }) => {
   return (
     <Box
       onClick={onClick}
@@ -79,7 +75,7 @@ const DietaryItem: React.FC<DietaryItemProps> = ({
         )}
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default DietaryItem;
+export default DietaryItem

@@ -1,10 +1,10 @@
-import React from "react";
-import { Box, Typography, Checkbox } from "@mui/material";
+import { Box, Checkbox, Typography } from "@mui/material"
+import type React from "react"
 
 interface CheckItemProps {
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
 }
 
 const CheckItem: React.FC<CheckItemProps> = ({ label, checked, onChange }) => {
@@ -113,7 +113,7 @@ const CheckItem: React.FC<CheckItemProps> = ({ label, checked, onChange }) => {
         </Typography>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default CheckItem;
+export default CheckItem

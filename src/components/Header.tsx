@@ -1,22 +1,22 @@
-import { Box, Typography, IconButton } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import backArrowIcon from "../assets/icons/back-arrow.svg";
+import { Box, IconButton, Typography } from "@mui/material"
+import { useNavigate } from "react-router-dom"
+import backArrowIcon from "../assets/icons/back-arrow.svg"
 
 interface HeaderProps {
-  title: string;
-  onBack?: () => void;
+  title: string
+  onBack?: () => void
 }
 
 const Header = ({ title, onBack }: HeaderProps) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleBack = () => {
     if (onBack) {
-      onBack();
+      onBack()
     } else {
-      navigate(-1); // デフォルトで前のページに戻る
+      navigate(-1) // デフォルトで前のページに戻る
     }
-  };
+  }
 
   return (
     <Box
@@ -160,7 +160,7 @@ const Header = ({ title, onBack }: HeaderProps) => {
         </Typography>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

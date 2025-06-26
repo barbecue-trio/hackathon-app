@@ -1,17 +1,12 @@
-import React from "react";
-import { Button as MuiButton, type ButtonProps } from "@mui/material";
+import { type ButtonProps, Button as MuiButton } from "@mui/material"
+import type React from "react"
 
 interface CustomButtonProps extends Omit<ButtonProps, "variant" | "color"> {
-  variant?: "primary" | "secondary" | "text";
-  children: React.ReactNode;
+  variant?: "primary" | "secondary" | "text"
+  children: React.ReactNode
 }
 
-const Button: React.FC<CustomButtonProps> = ({
-  variant = "primary",
-  children,
-  sx,
-  ...props
-}) => {
+const Button: React.FC<CustomButtonProps> = ({ variant = "primary", children, sx, ...props }) => {
   const getButtonStyles = () => {
     const baseStyles = {
       fontFamily: '"Spline Sans", "Roboto", sans-serif',
@@ -38,7 +33,7 @@ const Button: React.FC<CustomButtonProps> = ({
         maxWidth: "390px",
         margin: "0 auto",
       },
-    };
+    }
 
     switch (variant) {
       case "primary":
@@ -54,7 +49,7 @@ const Button: React.FC<CustomButtonProps> = ({
             backgroundColor: "#C4D1E4",
             transform: "translateY(0)",
           },
-        };
+        }
       case "secondary":
         return {
           ...baseStyles,
@@ -69,7 +64,7 @@ const Button: React.FC<CustomButtonProps> = ({
             backgroundColor: "#E8EDFA",
             transform: "translateY(0)",
           },
-        };
+        }
       case "text":
         return {
           ...baseStyles,
@@ -83,11 +78,11 @@ const Button: React.FC<CustomButtonProps> = ({
           "&:active": {
             backgroundColor: "#EEEEEE",
           },
-        };
+        }
       default:
-        return baseStyles;
+        return baseStyles
     }
-  };
+  }
 
   return (
     <MuiButton
@@ -99,7 +94,7 @@ const Button: React.FC<CustomButtonProps> = ({
     >
       {children}
     </MuiButton>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button

@@ -1,6 +1,6 @@
+import { CameraAlt, Home, Settings } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, CameraAlt, Settings } from "@mui/icons-material";
 
 const Footer = () => {
   const location = useLocation();
@@ -57,11 +57,11 @@ const Footer = () => {
           width: "100%",
         }}
       >
-        {footerItems.map((item, index) => {
+        {footerItems.map((item) => {
           const IconComponent = item.icon;
           return (
             <Box
-              key={index}
+              key={item.path}
               onClick={() => handleNavigation(item.path)}
               sx={{
                 display: "flex",

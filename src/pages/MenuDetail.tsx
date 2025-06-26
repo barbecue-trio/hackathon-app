@@ -1,10 +1,10 @@
-import React from "react";
 import { Box, Typography } from "@mui/material";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import DietaryItem from "../components/DietaryItem";
-import ramanDishMain from "../assets/images/ramen-dish-main.png";
+
 import ramanDishDetail from "../assets/images/ramen-dish-detail.png";
+import ramanDishMain from "../assets/images/ramen-dish-main.png";
+import DietaryItem from "../components/DietaryItem";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 
 function MenuDetail() {
   const dietaryItems = [
@@ -304,7 +304,7 @@ function MenuDetail() {
               >
                 {dietaryItems.map((item, index) => (
                   <DietaryItem
-                    key={index}
+                    key={`${item.label}-${index}`}
                     label={item.label}
                     isSelected={item.isSelected}
                   />

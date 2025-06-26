@@ -1,14 +1,14 @@
-import { Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import Button from "../components/Button";
-import Footer from "../components/Footer";
+import { Box, Typography } from "@mui/material"
+import { useNavigate } from "react-router-dom"
+import Button from "../components/Button"
+import Footer from "../components/Footer"
 
 function Home() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleRegister = () => {
-    navigate("/dietary-restrictions");
-  };
+    navigate("/dietary-restrictions")
+  }
   return (
     <Box className="app-container">
       <Box className="page-container">
@@ -95,8 +95,8 @@ function Home() {
                 maxWidth: "100%",
               }}
             >
-              Enjoy meals at restaurants in Japan with ease. Register, log in,
-              or use the app as a guest.
+              Enjoy meals at restaurants in Japan with ease. Register, log in, or use the app as a
+              guest.
             </Typography>
           </Box>
 
@@ -127,7 +127,7 @@ function Home() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default Home;
+export default Home
