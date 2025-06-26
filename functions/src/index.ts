@@ -2,10 +2,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 import * as admin from "firebase-admin"
 import { getFirestore } from "firebase-admin/firestore"
 import { defineString } from "firebase-functions/params"
-import { onObjectFinalized } from "firebase-functions/v2/storage"
+import { onRequest } from "firebase-functions/v2/https"
 
 // 環境変数の定義
 const geminiApiKey = defineString("GEMINI_API_KEY")
+const bucket = defineString("BUCKET")
 
 // 型定義
 interface MenuItem {
@@ -21,35 +22,60 @@ interface MenuCollection {
   menus: MenuItem[]
 }
 
+interface ProcessImageRequest {
+  storageId: string
+}
+
+interface ProcessImageResponse {
+  success: boolean
+  documentId?: string
+  error?: string
+  menuCount?: number
+}
+
 admin.initializeApp()
 
 const db = getFirestore("barbecue")
 
-export const processMenuImage = onObjectFinalized(
+export const processMenuImage = onRequest(
   {
-    bucket: "barbecue-trio.firebasestorage.app",
+    cors: true,
     region: "asia-northeast1",
     memory: "512MiB",
   },
-  async (event) => {
+  async (request, response) => {
     try {
-      const bucketName = event.data.bucket
-      const fileName = event.data.name
-
-      if (!fileName) {
-        console.log("ファイル名が取得できませんでした")
+      // POSTリクエストのみ許可
+      if (request.method !== "POST") {
+        response.status(405).json({
+          success: false,
+          error: "Method not allowed. Use POST.",
+        })
         return
       }
 
-      console.log("画像がアップロードされました:", fileName)
-      const gcsUri = `gs://${bucketName}/${fileName}`
+      const { storageId }: ProcessImageRequest = request.body
+
+      if (!storageId) {
+        response.status(400).json({
+          success: false,
+          error: "storageId is required",
+        })
+        return
+      }
+
+      console.log("ストレージIDが受け取られました:", storageId)
+      const gcsUri = `gs://${bucket.value()}/${storageId}`
 
       // Google AIでメニュー情報を抽出
       const menuNames = await extractMenuWithGoogleAI(gcsUri)
       console.log("抽出されたメニュー名:", menuNames)
 
       if (menuNames.length === 0) {
-        console.log("メニュー名が抽出できませんでした")
+        response.status(400).json({
+          success: false,
+          error: "メニュー名が抽出できませんでした",
+        })
         return
       }
 
@@ -57,23 +83,35 @@ export const processMenuImage = onObjectFinalized(
       const menuCollection: MenuCollection = {
         menus: menuNames.map((menuName) => ({
           name: menuName,
-          image_id: fileName,
+          image_id: "",
           ingredients: [],
           allergy_ids: [],
           dietary_restriction_ids: [],
-          category_id: fileName,
+          category_id: "",
         })),
       }
 
       console.log("保存用メニューコレクション:", menuCollection)
 
       // Firestoreにメニュー情報を保存
-      await saveMenuData(fileName, menuCollection)
+      const documentId = await saveMenuData(storageId, menuCollection)
 
-      console.log("メニュー情報の保存が完了しました")
+      console.log("メニュー情報の保存が完了しました。ドキュメントID:", documentId)
+
+      // 成功レスポンス
+      const responseData: ProcessImageResponse = {
+        success: true,
+        documentId: documentId,
+        menuCount: menuNames.length,
+      }
+
+      response.status(200).json(responseData)
     } catch (error) {
       console.error("エラーが発生しました:", error)
-      throw error
+      response.status(500).json({
+        success: false,
+        error: "Internal server error",
+      })
     }
   }
 )
@@ -286,6 +324,7 @@ async function saveMenuData(imageId: string, menuCollection: MenuCollection) {
     })
     console.log(`${menuCollection.menus.length}個のメニューを保存しました`)
     console.log("ドキュメントID:", docRef.id)
+    return docRef.id
   } catch (error) {
     console.error("Firestore保存エラー:", error)
     throw error
