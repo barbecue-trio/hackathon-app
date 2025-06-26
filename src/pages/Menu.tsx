@@ -1,27 +1,25 @@
-import { Box, Typography } from "@mui/material";
-import { useState } from "react";
+import { Box, Typography } from "@mui/material"
+import { useState } from "react"
 // Vite static asset import
-import menuItemImg from "../assets/images/menu-item-image.png";
-import CheckItem from "../components/CheckItem";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import MenuItem from "../components/MenuItem";
+import menuItemImg from "../assets/images/menu-item-image.png"
+import CheckItem from "../components/CheckItem"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
+import MenuItem from "../components/MenuItem"
 
 function Menu() {
   // Dietary Restrictions state
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<
-    Record<string, boolean>
-  >({
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<Record<string, boolean>>({
     Vegetarian: false,
     "No Pork": false,
-  });
+  })
 
   const handleDietaryChange = (restriction: string, checked: boolean) => {
     setDietaryRestrictions((prev) => ({
       ...prev,
       [restriction]: checked,
-    }));
-  };
+    }))
+  }
 
   const menuItems = [
     {
@@ -39,7 +37,7 @@ function Menu() {
       ingredients: "Contains: Tofu, Vegetables",
       imageSrc: menuItemImg,
     },
-  ];
+  ]
 
   return (
     <Box className="app-container">
@@ -88,18 +86,14 @@ function Menu() {
               width: "100%",
             }}
           >
-            {Object.entries(dietaryRestrictions).map(
-              ([restriction, checked]) => (
-                <CheckItem
-                  key={restriction}
-                  label={restriction}
-                  checked={checked}
-                  onChange={(newChecked) =>
-                    handleDietaryChange(restriction, newChecked)
-                  }
-                />
-              )
-            )}
+            {Object.entries(dietaryRestrictions).map(([restriction, checked]) => (
+              <CheckItem
+                key={restriction}
+                label={restriction}
+                checked={checked}
+                onChange={(newChecked) => handleDietaryChange(restriction, newChecked)}
+              />
+            ))}
             {/* Additional Vegetarian item as shown in Figma */}
             <CheckItem label="Vegetarian" checked={false} onChange={() => {}} />
           </Box>
@@ -156,7 +150,7 @@ function Menu() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default Menu;
+export default Menu

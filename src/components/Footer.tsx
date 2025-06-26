@@ -1,10 +1,10 @@
-import { CameraAlt, Home, Settings } from "@mui/icons-material";
-import { Box } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
+import { CameraAlt, Home, Settings } from "@mui/icons-material"
+import { Box } from "@mui/material"
+import { useLocation, useNavigate } from "react-router-dom"
 
 const Footer = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const footerItems = [
     {
@@ -25,11 +25,11 @@ const Footer = () => {
       isActive: location.pathname === "/settings",
       label: "Settings",
     },
-  ];
+  ]
 
   const handleNavigation = (path: string) => {
-    navigate(path);
-  };
+    navigate(path)
+  }
 
   return (
     <Box
@@ -58,7 +58,7 @@ const Footer = () => {
         }}
       >
         {footerItems.map((item) => {
-          const IconComponent = item.icon;
+          const IconComponent = item.icon
           return (
             <Box
               key={item.path}
@@ -101,11 +101,11 @@ const Footer = () => {
                 />
               </Box>
             </Box>
-          );
+          )
         })}
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

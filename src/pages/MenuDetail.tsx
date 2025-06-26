@@ -1,10 +1,10 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material"
 
-import ramanDishDetail from "../assets/images/ramen-dish-detail.png";
-import ramanDishMain from "../assets/images/ramen-dish-main.png";
-import DietaryItem from "../components/DietaryItem";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
+import ramanDishDetail from "../assets/images/ramen-dish-detail.png"
+import ramanDishMain from "../assets/images/ramen-dish-main.png"
+import DietaryItem from "../components/DietaryItem"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
 
 function MenuDetail() {
   const dietaryItems = [
@@ -13,7 +13,7 @@ function MenuDetail() {
     { label: "Gluten-Free", isSelected: false },
     { label: "Kosher", isSelected: false },
     { label: "Vegetarian", isSelected: false },
-  ];
+  ]
 
   return (
     <Box className="app-container">
@@ -118,8 +118,8 @@ function MenuDetail() {
                   width: "100%",
                 }}
               >
-                A classic Japanese noodle soup with a rich broth, wheat noodles,
-                and various toppings.
+                A classic Japanese noodle soup with a rich broth, wheat noodles, and various
+                toppings.
               </Typography>
             </Box>
           </Box>
@@ -180,8 +180,8 @@ function MenuDetail() {
                   width: "100%",
                 }}
               >
-                Wheat noodles, pork broth, soy sauce, green onions, bamboo
-                shoots, seaweed, and sliced pork.
+                Wheat noodles, pork broth, soy sauce, green onions, bamboo shoots, seaweed, and
+                sliced pork.
               </Typography>
             </Box>
           </Box>
@@ -242,8 +242,7 @@ function MenuDetail() {
                   width: "100%",
                 }}
               >
-                Contains wheat (gluten), soy, and may contain traces of
-                shellfish.
+                Contains wheat (gluten), soy, and may contain traces of shellfish.
               </Typography>
             </Box>
           </Box>
@@ -354,7 +353,7 @@ function MenuDetail() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default MenuDetail;
+export default MenuDetail

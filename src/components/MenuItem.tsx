@@ -1,18 +1,18 @@
-import { Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Box, Typography } from "@mui/material"
+import { useNavigate } from "react-router-dom"
 
 interface MenuItemProps {
-  title: string;
-  ingredients: string;
-  imageSrc?: string;
+  title: string
+  ingredients: string
+  imageSrc?: string
 }
 
 function MenuItem({ title, ingredients, imageSrc }: MenuItemProps) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleClick = () => {
-    navigate("/menu-detail");
-  };
+    navigate("/menu-detail")
+  }
 
   return (
     <Box
@@ -115,7 +115,7 @@ function MenuItem({ title, ingredients, imageSrc }: MenuItemProps) {
         </Typography>
       </Box>
     </Box>
-  );
+  )
 }
 
-export default MenuItem;
+export default MenuItem

@@ -1,24 +1,24 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material"
 
-import { useNavigate } from "react-router-dom";
-import Button from "../components/Button";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
+import { useNavigate } from "react-router-dom"
+import Button from "../components/Button"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
 
 function MenuScanner() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleCameraScan = () => {
-    console.log("Scan with Camera clicked");
+    console.log("Scan with Camera clicked")
     // カメラスキャン機能を実装後、結果をMenu Analysisページに遷移
-    navigate("/menu");
-  };
+    navigate("/menu")
+  }
 
   const handleUploadImage = () => {
-    console.log("Upload Image clicked");
+    console.log("Upload Image clicked")
     // 画像アップロード機能を実装後、結果をMenu Analysisページに遷移
-    navigate("/menu");
-  };
+    navigate("/menu")
+  }
 
   return (
     <Box className="app-container">
@@ -113,7 +113,7 @@ function MenuScanner() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default MenuScanner;
+export default MenuScanner
