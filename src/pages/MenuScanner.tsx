@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material"
-
+import { useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import Button from "../components/Button"
 import Footer from "../components/Footer"
@@ -7,17 +7,58 @@ import Header from "../components/Header"
 
 function MenuScanner() {
   const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleCameraScan = () => {
+  const handleCameraScan = async () => {
     console.log("Scan with Camera clicked")
-    // カメラスキャン機能を実装後、結果をMenu Analysisページに遷移
-    navigate("/menu")
+    try {
+      // カメラアクセスを要求
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment", // 背面カメラを優先
+        },
+      })
+
+      // カメラストリームが取得できた場合
+      if (stream) {
+        console.log("Camera access granted")
+        // TODO: カメラプレビューの表示とキャプチャ機能を実装
+        // 現在は一旦ストリームを停止
+        for (const track of stream.getTracks()) {
+          track.stop()
+        }
+
+        // Menu Analysisページに遷移（仮の実装）
+        navigate("/menu")
+      }
+    } catch (error) {
+      console.error("Camera access denied or not available:", error)
+      alert("カメラへのアクセスが拒否されました。ブラウザの設定を確認してください。")
+    }
   }
 
   const handleUploadImage = () => {
     console.log("Upload Image clicked")
-    // 画像アップロード機能を実装後、結果をMenu Analysisページに遷移
-    navigate("/menu")
+    // ファイル選択ダイアログを開く
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      console.log("File selected:", file.name)
+      // 画像ファイルかどうかをチェック
+      if (file.type.startsWith("image/")) {
+        console.log("Valid image file selected")
+        // TODO: 画像解析処理を実装
+        // Menu Analysisページに遷移
+        navigate("/menu")
+      } else {
+        alert("画像ファイルを選択してください。")
+      }
+    }
   }
 
   return (
@@ -107,6 +148,15 @@ function MenuScanner() {
               Upload Image
             </Button>
           </Box>
+
+          {/* Hidden file input for image upload */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleFileSelect}
+          />
         </Box>
 
         {/* Footer */}
