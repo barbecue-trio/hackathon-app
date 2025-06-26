@@ -2,6 +2,10 @@ import { onObjectFinalized } from "firebase-functions/v2/storage";
 import * as admin from "firebase-admin";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getFirestore } from "firebase-admin/firestore";
+import { defineString } from "firebase-functions/params";
+
+// 環境変数の定義
+const geminiApiKey = defineString("GEMINI_API_KEY");
 
 // 型定義
 interface MenuItem {
@@ -17,13 +21,10 @@ interface MenuCollection {
   menus: MenuItem[];
 }
 
-// Firebase Admin SDKの初期化
 admin.initializeApp();
 
-// データベースIDを指定してFirestoreインスタンスを取得
 const db = getFirestore("barbecue");
 
-// Firebase Storageに画像がアップロードされた際のトリガー関数
 export const processMenuImage = onObjectFinalized(
   {
     bucket: "barbecue-trio.firebasestorage.app",
@@ -47,14 +48,6 @@ export const processMenuImage = onObjectFinalized(
       const menuNames = await extractMenuWithGoogleAI(gcsUri);
       console.log("抽出されたメニュー名:", menuNames);
 
-      // テスト用のダミーデータ（フォールバック用）
-      // const menuNames = [
-      //   "テストメニュー1",
-      //   "テストメニュー2",
-      //   "テストメニュー3",
-      // ];
-      // console.log("テスト用メニュー名:", menuNames);
-
       if (menuNames.length === 0) {
         console.log("メニュー名が抽出できませんでした");
         return;
@@ -65,10 +58,10 @@ export const processMenuImage = onObjectFinalized(
         menus: menuNames.map((menuName) => ({
           name: menuName,
           image_id: fileName,
-          ingredients: [], // 後で食材分析機能で追加
-          allergy_ids: [], // 後でアレルギー分析機能で追加
-          dietary_restriction_ids: [], // 後で食事制限分析機能で追加
-          category_id: fileName, // 画像IDをカテゴリIDとして使用
+          ingredients: [],
+          allergy_ids: [],
+          dietary_restriction_ids: [],
+          category_id: fileName,
         })),
       };
 
@@ -85,20 +78,16 @@ export const processMenuImage = onObjectFinalized(
   }
 );
 
-// Google AIで画像からメニュー名を抽出する関数
 async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
   try {
-    // Google AI SDKの初期化
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = geminiApiKey.value();
     if (!apiKey) {
       throw new Error("Gemini API key not configured");
     }
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // 画像をBase64エンコードで取得
     const imageData = await fetchImageAsBase64(gcsUri);
 
-    // モデルの初期化
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
@@ -119,7 +108,6 @@ async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
 ["メニュー名1", "メニュー名2", "メニュー名3", ...]
 `;
 
-    // 画像をGoogle AIに渡す
     const result = await model.generateContent([
       prompt,
       {
@@ -133,7 +121,6 @@ async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
     const text = result.response.text();
     console.log("Google AIの応答:", text);
 
-    // JSONを抽出（```json で囲まれている場合がある）
     const jsonMatch =
       text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/);
     const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
@@ -143,7 +130,6 @@ async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
       return Array.isArray(menuNames) ? menuNames : [];
     } catch (parseError) {
       console.error("JSON解析エラー:", parseError);
-      // フォールバック：テキストから手動で抽出
       return extractMenuNamesFromText(text);
     }
   } catch (error) {
@@ -152,10 +138,8 @@ async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
   }
 }
 
-// GCSから画像をBase64エンコードで取得する関数
 async function fetchImageAsBase64(gcsUri: string): Promise<string> {
   try {
-    // GCS URIからバケット名とファイル名を抽出
     const match = gcsUri.match(/gs:\/\/([^\/]+)\/(.+)/);
     if (!match) {
       throw new Error("Invalid GCS URI");
@@ -175,41 +159,36 @@ async function fetchImageAsBase64(gcsUri: string): Promise<string> {
   }
 }
 
-// テキストからメニュー名を抽出する関数（フォールバック用）
 function extractMenuNamesFromText(text: string): string[] {
   if (!text) return [];
 
-  // テキストを行に分割
   const lines = text
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
   const menuNames: string[] = [];
 
-  // 価格のみのパターン
   const priceOnlyPatterns = [
-    /^\d+$/, // 数字のみ
-    /^\$\d+$/, // $数字
-    /^\d+円$/, // 数字円
-    /^\d+\.$/, // 数字.
-    /^\d+\s*円$/, // 数字 円
-    /^\d+\s*-\s*\d+$/, // 数字-数字（価格範囲）
-    /^\d+\s*〜\s*\d+$/, // 数字〜数字（価格範囲）
+    /^\d+$/,
+    /^\$\d+$/,
+    /^\d+円$/,
+    /^\d+\.$/,
+    /^\d+\s*円$/,
+    /^\d+\s*-\s*\d+$/,
+    /^\d+\s*〜\s*\d+$/,
   ];
 
-  // 除外すべきパターン
   const excludePatterns = [
-    /^[0-9\s\.\$円\-〜]+$/, // 数字、空白、.、$、円、-、〜のみ
-    /^[0-9]+$/, // 数字のみ
-    /^[0-9]+\.$/, // 数字.
-    /^[0-9]+\s*円$/, // 数字 円
-    /^\$[0-9]+$/, // $数字
-    /^[0-9]+\s*[0-9]+$/, // 数字 数字（価格範囲）
-    /^[0-9]+\s*-\s*[0-9]+$/, // 数字-数字
-    /^[0-9]+\s*〜\s*[0-9]+$/, // 数字〜数字
+    /^[0-9\s\.\$円\-〜]+$/,
+    /^[0-9]+$/,
+    /^[0-9]+\.$/,
+    /^[0-9]+\s*円$/,
+    /^\$[0-9]+$/,
+    /^[0-9]+\s*[0-9]+$/,
+    /^[0-9]+\s*-\s*[0-9]+$/,
+    /^[0-9]+\s*〜\s*[0-9]+$/,
   ];
 
-  // カテゴリーキーワード（これらは除外）
   const categoryKeywords = [
     "とりあえず",
     "おすすめ",
@@ -239,34 +218,17 @@ function extractMenuNamesFromText(text: string): string[] {
   ];
 
   for (const line of lines) {
-    // 空行をスキップ
     if (!line || line.trim().length === 0) continue;
+    if (priceOnlyPatterns.some((pattern) => pattern.test(line))) continue;
+    if (excludePatterns.some((pattern) => pattern.test(line))) continue;
+    if (categoryKeywords.some((keyword) => line.includes(keyword))) continue;
 
-    // 価格のみの行をスキップ
-    if (priceOnlyPatterns.some((pattern) => pattern.test(line))) {
-      continue;
-    }
-
-    // 除外パターンにマッチする行をスキップ
-    if (excludePatterns.some((pattern) => pattern.test(line))) {
-      continue;
-    }
-
-    // カテゴリーキーワードを含む行をスキップ
-    if (categoryKeywords.some((keyword) => line.includes(keyword))) {
-      continue;
-    }
-
-    // 価格が含まれている場合は価格部分を除去
     let menuName = line;
+    menuName = menuName.replace(/\s*\d+円?\s*$/, "");
+    menuName = menuName.replace(/^\s*\d+円?\s*/, "");
+    menuName = menuName.replace(/\s*\$\d+\s*/, "");
+    menuName = menuName.replace(/\s*\d+\.\d+\s*/, "");
 
-    // 価格パターンを除去
-    menuName = menuName.replace(/\s*\d+円?\s*$/, ""); // 末尾の価格
-    menuName = menuName.replace(/^\s*\d+円?\s*/, ""); // 先頭の価格
-    menuName = menuName.replace(/\s*\$\d+\s*/, ""); // $価格
-    menuName = menuName.replace(/\s*\d+\.\d+\s*/, ""); // 小数点価格
-
-    // 複合メニューを分割
     const subMenus = menuName
       .split(/[・、,]/)
       .map((item) => item.trim())
@@ -279,18 +241,12 @@ function extractMenuNamesFromText(text: string): string[] {
     }
   }
 
-  // 重複を除去
   return [...new Set(menuNames)];
 }
 
-// メニュー名が有効かどうかをチェックする関数
 function isValidMenuName(name: string): boolean {
   if (!name || name.length < 2) return false;
-
-  // 数字のみ、記号のみは除外
   if (/^[0-9\s\.\$円\-〜]+$/.test(name)) return false;
-
-  // カテゴリーキーワードは除外
   const categoryKeywords = [
     "とりあえず",
     "おすすめ",
@@ -317,25 +273,18 @@ function isValidMenuName(name: string): boolean {
     "分類",
     "種類",
   ];
-
   if (categoryKeywords.some((keyword) => name.includes(keyword))) return false;
-
   return true;
 }
 
-// Firestoreにメニューデータを保存する関数
 async function saveMenuData(imageId: string, menuCollection: MenuCollection) {
   try {
-    // menu_collectionsコレクションにドキュメントを作成
     const docRef = db.collection("menu_collections").doc();
-
-    // データを保存
     await docRef.set({
       ...menuCollection,
       created_at: admin.firestore.FieldValue.serverTimestamp(),
       updated_at: admin.firestore.FieldValue.serverTimestamp(),
     });
-
     console.log(`${menuCollection.menus.length}個のメニューを保存しました`);
     console.log("ドキュメントID:", docRef.id);
   } catch (error) {

@@ -5,9 +5,13 @@ const storage_1 = require("firebase-functions/v2/storage");
 const admin = require("firebase-admin");
 const generative_ai_1 = require("@google/generative-ai");
 const firestore_1 = require("firebase-admin/firestore");
+const params_1 = require("firebase-functions/params");
+// 環境変数の定義
+const geminiApiKey = (0, params_1.defineString)("GEMINI_API_KEY");
 // Firebase Admin SDKの初期化
 admin.initializeApp();
 // データベースIDを指定してFirestoreインスタンスを取得
+// もしデフォルトデータベースを使用する場合は、const db = getFirestore(); に変更してください。
 const db = (0, firestore_1.getFirestore)("barbecue");
 // Firebase Storageに画像がアップロードされた際のトリガー関数
 exports.processMenuImage = (0, storage_1.onObjectFinalized)({
@@ -27,13 +31,6 @@ exports.processMenuImage = (0, storage_1.onObjectFinalized)({
         // Google AIでメニュー情報を抽出
         const menuNames = await extractMenuWithGoogleAI(gcsUri);
         console.log("抽出されたメニュー名:", menuNames);
-        // テスト用のダミーデータ（フォールバック用）
-        // const menuNames = [
-        //   "テストメニュー1",
-        //   "テストメニュー2",
-        //   "テストメニュー3",
-        // ];
-        // console.log("テスト用メニュー名:", menuNames);
         if (menuNames.length === 0) {
             console.log("メニュー名が抽出できませんでした");
             return;
@@ -56,14 +53,14 @@ exports.processMenuImage = (0, storage_1.onObjectFinalized)({
     }
     catch (error) {
         console.error("エラーが発生しました:", error);
-        throw error;
+        throw error; // エラーを再スローして、関数の実行が失敗したことを示す
     }
 });
 // Google AIで画像からメニュー名を抽出する関数
 async function extractMenuWithGoogleAI(gcsUri) {
     try {
         // Google AI SDKの初期化
-        const apiKey = process.env.GEMINI_API_KEY;
+        const apiKey = geminiApiKey.value();
         if (!apiKey) {
             throw new Error("Gemini API key not configured");
         }
@@ -158,7 +155,7 @@ function extractMenuNamesFromText(text) {
         /^\d+\.$/,
         /^\d+\s*円$/,
         /^\d+\s*-\s*\d+$/,
-        /^\d+\s*〜\s*\d+$/, // 数字〜数字（価格範囲）
+        /^\d+\s*〜\s*\d+$/,
     ];
     // 除外すべきパターン
     const excludePatterns = [
@@ -169,7 +166,7 @@ function extractMenuNamesFromText(text) {
         /^\$[0-9]+$/,
         /^[0-9]+\s*[0-9]+$/,
         /^[0-9]+\s*-\s*[0-9]+$/,
-        /^[0-9]+\s*〜\s*[0-9]+$/, // 数字〜数字
+        /^[0-9]+\s*〜\s*[0-9]+$/,
     ];
     // カテゴリーキーワード（これらは除外）
     const categoryKeywords = [
@@ -200,29 +197,19 @@ function extractMenuNamesFromText(text) {
         "種類",
     ];
     for (const line of lines) {
-        // 空行をスキップ
         if (!line || line.trim().length === 0)
             continue;
-        // 価格のみの行をスキップ
-        if (priceOnlyPatterns.some((pattern) => pattern.test(line))) {
+        if (priceOnlyPatterns.some((pattern) => pattern.test(line)))
             continue;
-        }
-        // 除外パターンにマッチする行をスキップ
-        if (excludePatterns.some((pattern) => pattern.test(line))) {
+        if (excludePatterns.some((pattern) => pattern.test(line)))
             continue;
-        }
-        // カテゴリーキーワードを含む行をスキップ
-        if (categoryKeywords.some((keyword) => line.includes(keyword))) {
+        if (categoryKeywords.some((keyword) => line.includes(keyword)))
             continue;
-        }
-        // 価格が含まれている場合は価格部分を除去
         let menuName = line;
-        // 価格パターンを除去
-        menuName = menuName.replace(/\s*\d+円?\s*$/, ""); // 末尾の価格
-        menuName = menuName.replace(/^\s*\d+円?\s*/, ""); // 先頭の価格
-        menuName = menuName.replace(/\s*\$\d+\s*/, ""); // $価格
-        menuName = menuName.replace(/\s*\d+\.\d+\s*/, ""); // 小数点価格
-        // 複合メニューを分割
+        menuName = menuName.replace(/\s*\d+円?\s*$/, "");
+        menuName = menuName.replace(/^\s*\d+円?\s*/, "");
+        menuName = menuName.replace(/\s*\$\d+\s*/, "");
+        menuName = menuName.replace(/\s*\d+\.\d+\s*/, "");
         const subMenus = menuName
             .split(/[・、,]/)
             .map((item) => item.trim())
@@ -233,17 +220,14 @@ function extractMenuNamesFromText(text) {
             }
         }
     }
-    // 重複を除去
     return [...new Set(menuNames)];
 }
 // メニュー名が有効かどうかをチェックする関数
 function isValidMenuName(name) {
     if (!name || name.length < 2)
         return false;
-    // 数字のみ、記号のみは除外
     if (/^[0-9\s\.\$円\-〜]+$/.test(name))
         return false;
-    // カテゴリーキーワードは除外
     const categoryKeywords = [
         "とりあえず",
         "おすすめ",
@@ -277,9 +261,7 @@ function isValidMenuName(name) {
 // Firestoreにメニューデータを保存する関数
 async function saveMenuData(imageId, menuCollection) {
     try {
-        // menu_collectionsコレクションにドキュメントを作成
         const docRef = db.collection("menu_collections").doc();
-        // データを保存
         await docRef.set(Object.assign(Object.assign({}, menuCollection), { created_at: admin.firestore.FieldValue.serverTimestamp(), updated_at: admin.firestore.FieldValue.serverTimestamp() }));
         console.log(`${menuCollection.menus.length}個のメニューを保存しました`);
         console.log("ドキュメントID:", docRef.id);
