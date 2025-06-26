@@ -37,7 +37,7 @@ admin.initializeApp();
 
 const db = getFirestore("barbecue");
 
-export const processMenuImageOcr = onRequest(
+export const processMenuImage = onRequest(
   {
     cors: true,
     region: "asia-northeast1",
