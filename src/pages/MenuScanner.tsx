@@ -1,65 +1,65 @@
-import { Box, Typography } from "@mui/material";
-import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "../components/Button";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
+import { Box, Typography } from "@mui/material"
+import { useRef } from "react"
+import { useNavigate } from "react-router-dom"
+import Button from "../components/Button"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
 
 function MenuScanner() {
-  const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleCameraScan = async () => {
-    console.log("Scan with Camera clicked");
+    console.log("Scan with Camera clicked")
     try {
       // カメラアクセスを要求
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "environment", // 背面カメラを優先
         },
-      });
+      })
 
       // カメラストリームが取得できた場合
       if (stream) {
-        console.log("Camera access granted");
+        console.log("Camera access granted")
         // TODO: カメラプレビューの表示とキャプチャ機能を実装
         // 現在は一旦ストリームを停止
-        stream.getTracks().forEach((track) => track.stop());
+        for (const track of stream.getTracks()) {
+          track.stop()
+        }
 
         // Menu Analysisページに遷移（仮の実装）
-        navigate("/menu");
+        navigate("/menu")
       }
     } catch (error) {
-      console.error("Camera access denied or not available:", error);
-      alert(
-        "カメラへのアクセスが拒否されました。ブラウザの設定を確認してください。"
-      );
+      console.error("Camera access denied or not available:", error)
+      alert("カメラへのアクセスが拒否されました。ブラウザの設定を確認してください。")
     }
-  };
+  }
 
   const handleUploadImage = () => {
-    console.log("Upload Image clicked");
+    console.log("Upload Image clicked")
     // ファイル選択ダイアログを開く
     if (fileInputRef.current) {
-      fileInputRef.current.click();
+      fileInputRef.current.click()
     }
-  };
+  }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0]
     if (file) {
-      console.log("File selected:", file.name);
+      console.log("File selected:", file.name)
       // 画像ファイルかどうかをチェック
       if (file.type.startsWith("image/")) {
-        console.log("Valid image file selected");
+        console.log("Valid image file selected")
         // TODO: 画像解析処理を実装
         // Menu Analysisページに遷移
-        navigate("/menu");
+        navigate("/menu")
       } else {
-        alert("画像ファイルを選択してください。");
+        alert("画像ファイルを選択してください。")
       }
     }
-  };
+  }
 
   return (
     <Box className="app-container">
@@ -163,7 +163,7 @@ function MenuScanner() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default MenuScanner;
+export default MenuScanner
