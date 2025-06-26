@@ -1,29 +1,29 @@
-import { onObjectFinalized } from "firebase-functions/v2/storage";
-import * as admin from "firebase-admin";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { getFirestore } from "firebase-admin/firestore";
-import { defineString } from "firebase-functions/params";
+import { GoogleGenerativeAI } from "@google/generative-ai"
+import * as admin from "firebase-admin"
+import { getFirestore } from "firebase-admin/firestore"
+import { defineString } from "firebase-functions/params"
+import { onObjectFinalized } from "firebase-functions/v2/storage"
 
 // 環境変数の定義
-const geminiApiKey = defineString("GEMINI_API_KEY");
+const geminiApiKey = defineString("GEMINI_API_KEY")
 
 // 型定義
 interface MenuItem {
-  name: string;
-  image_id: string;
-  ingredients: string[];
-  allergy_ids: string[];
-  dietary_restriction_ids: string[];
-  category_id: string;
+  name: string
+  image_id: string
+  ingredients: string[]
+  allergy_ids: string[]
+  dietary_restriction_ids: string[]
+  category_id: string
 }
 
 interface MenuCollection {
-  menus: MenuItem[];
+  menus: MenuItem[]
 }
 
-admin.initializeApp();
+admin.initializeApp()
 
-const db = getFirestore("barbecue");
+const db = getFirestore("barbecue")
 
 export const processMenuImage = onObjectFinalized(
   {
@@ -33,24 +33,24 @@ export const processMenuImage = onObjectFinalized(
   },
   async (event) => {
     try {
-      const bucketName = event.data.bucket;
-      const fileName = event.data.name;
+      const bucketName = event.data.bucket
+      const fileName = event.data.name
 
       if (!fileName) {
-        console.log("ファイル名が取得できませんでした");
-        return;
+        console.log("ファイル名が取得できませんでした")
+        return
       }
 
-      console.log("画像がアップロードされました:", fileName);
-      const gcsUri = `gs://${bucketName}/${fileName}`;
+      console.log("画像がアップロードされました:", fileName)
+      const gcsUri = `gs://${bucketName}/${fileName}`
 
       // Google AIでメニュー情報を抽出
-      const menuNames = await extractMenuWithGoogleAI(gcsUri);
-      console.log("抽出されたメニュー名:", menuNames);
+      const menuNames = await extractMenuWithGoogleAI(gcsUri)
+      console.log("抽出されたメニュー名:", menuNames)
 
       if (menuNames.length === 0) {
-        console.log("メニュー名が抽出できませんでした");
-        return;
+        console.log("メニュー名が抽出できませんでした")
+        return
       }
 
       // 新しいデータ構造でメニュー情報を作成
@@ -63,32 +63,32 @@ export const processMenuImage = onObjectFinalized(
           dietary_restriction_ids: [],
           category_id: fileName,
         })),
-      };
+      }
 
-      console.log("保存用メニューコレクション:", menuCollection);
+      console.log("保存用メニューコレクション:", menuCollection)
 
       // Firestoreにメニュー情報を保存
-      await saveMenuData(fileName, menuCollection);
+      await saveMenuData(fileName, menuCollection)
 
-      console.log("メニュー情報の保存が完了しました");
+      console.log("メニュー情報の保存が完了しました")
     } catch (error) {
-      console.error("エラーが発生しました:", error);
-      throw error;
+      console.error("エラーが発生しました:", error)
+      throw error
     }
   }
-);
+)
 
 async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
   try {
-    const apiKey = geminiApiKey.value();
+    const apiKey = geminiApiKey.value()
     if (!apiKey) {
-      throw new Error("Gemini API key not configured");
+      throw new Error("Gemini API key not configured")
     }
-    const genAI = new GoogleGenerativeAI(apiKey);
+    const genAI = new GoogleGenerativeAI(apiKey)
 
-    const imageData = await fetchImageAsBase64(gcsUri);
+    const imageData = await fetchImageAsBase64(gcsUri)
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
     const prompt = `
 この画像は居酒屋のメニューです。以下の条件でメニュー名のみを抽出してください：
@@ -106,7 +106,7 @@ async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
 
 以下の形式でJSON配列で返してください：
 ["メニュー名1", "メニュー名2", "メニュー名3", ...]
-`;
+`
 
     const result = await model.generateContent([
       prompt,
@@ -116,57 +116,56 @@ async function extractMenuWithGoogleAI(gcsUri: string): Promise<string[]> {
           data: imageData,
         },
       },
-    ]);
+    ])
 
-    const text = result.response.text();
-    console.log("Google AIの応答:", text);
+    const text = result.response.text()
+    console.log("Google AIの応答:", text)
 
-    const jsonMatch =
-      text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/);
-    const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
+    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/)
+    const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text
 
     try {
-      const menuNames = JSON.parse(jsonString);
-      return Array.isArray(menuNames) ? menuNames : [];
+      const menuNames = JSON.parse(jsonString)
+      return Array.isArray(menuNames) ? menuNames : []
     } catch (parseError) {
-      console.error("JSON解析エラー:", parseError);
-      return extractMenuNamesFromText(text);
+      console.error("JSON解析エラー:", parseError)
+      return extractMenuNamesFromText(text)
     }
   } catch (error) {
-    console.error("Google AIでの抽出エラー:", error);
-    throw error;
+    console.error("Google AIでの抽出エラー:", error)
+    throw error
   }
 }
 
 async function fetchImageAsBase64(gcsUri: string): Promise<string> {
   try {
-    const match = gcsUri.match(/gs:\/\/([^\/]+)\/(.+)/);
+    const match = gcsUri.match(/gs:\/\/([^\/]+)\/(.+)/)
     if (!match) {
-      throw new Error("Invalid GCS URI");
+      throw new Error("Invalid GCS URI")
     }
-    const bucketName = match[1];
-    const fileName = match[2];
+    const bucketName = match[1]
+    const fileName = match[2]
 
     // Firebase Admin SDKを使用してGCSからファイルを取得
-    const bucket = admin.storage().bucket(bucketName);
-    const file = bucket.file(fileName);
-    const [buffer] = await file.download();
+    const bucket = admin.storage().bucket(bucketName)
+    const file = bucket.file(fileName)
+    const [buffer] = await file.download()
 
-    return buffer.toString("base64");
+    return buffer.toString("base64")
   } catch (error) {
-    console.error("画像取得エラー:", error);
-    throw error;
+    console.error("画像取得エラー:", error)
+    throw error
   }
 }
 
 function extractMenuNamesFromText(text: string): string[] {
-  if (!text) return [];
+  if (!text) return []
 
   const lines = text
     .split("\n")
     .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-  const menuNames: string[] = [];
+    .filter((line) => line.length > 0)
+  const menuNames: string[] = []
 
   const priceOnlyPatterns = [
     /^\d+$/,
@@ -176,7 +175,7 @@ function extractMenuNamesFromText(text: string): string[] {
     /^\d+\s*円$/,
     /^\d+\s*-\s*\d+$/,
     /^\d+\s*〜\s*\d+$/,
-  ];
+  ]
 
   const excludePatterns = [
     /^[0-9\s\.\$円\-〜]+$/,
@@ -187,7 +186,7 @@ function extractMenuNamesFromText(text: string): string[] {
     /^[0-9]+\s*[0-9]+$/,
     /^[0-9]+\s*-\s*[0-9]+$/,
     /^[0-9]+\s*〜\s*[0-9]+$/,
-  ];
+  ]
 
   const categoryKeywords = [
     "とりあえず",
@@ -215,38 +214,38 @@ function extractMenuNamesFromText(text: string): string[] {
     "カテゴリー",
     "分類",
     "種類",
-  ];
+  ]
 
   for (const line of lines) {
-    if (!line || line.trim().length === 0) continue;
-    if (priceOnlyPatterns.some((pattern) => pattern.test(line))) continue;
-    if (excludePatterns.some((pattern) => pattern.test(line))) continue;
-    if (categoryKeywords.some((keyword) => line.includes(keyword))) continue;
+    if (!line || line.trim().length === 0) continue
+    if (priceOnlyPatterns.some((pattern) => pattern.test(line))) continue
+    if (excludePatterns.some((pattern) => pattern.test(line))) continue
+    if (categoryKeywords.some((keyword) => line.includes(keyword))) continue
 
-    let menuName = line;
-    menuName = menuName.replace(/\s*\d+円?\s*$/, "");
-    menuName = menuName.replace(/^\s*\d+円?\s*/, "");
-    menuName = menuName.replace(/\s*\$\d+\s*/, "");
-    menuName = menuName.replace(/\s*\d+\.\d+\s*/, "");
+    let menuName = line
+    menuName = menuName.replace(/\s*\d+円?\s*$/, "")
+    menuName = menuName.replace(/^\s*\d+円?\s*/, "")
+    menuName = menuName.replace(/\s*\$\d+\s*/, "")
+    menuName = menuName.replace(/\s*\d+\.\d+\s*/, "")
 
     const subMenus = menuName
       .split(/[・、,]/)
       .map((item) => item.trim())
-      .filter((item) => item.length > 0);
+      .filter((item) => item.length > 0)
 
     for (const subMenu of subMenus) {
       if (isValidMenuName(subMenu)) {
-        menuNames.push(subMenu);
+        menuNames.push(subMenu)
       }
     }
   }
 
-  return [...new Set(menuNames)];
+  return [...new Set(menuNames)]
 }
 
 function isValidMenuName(name: string): boolean {
-  if (!name || name.length < 2) return false;
-  if (/^[0-9\s\.\$円\-〜]+$/.test(name)) return false;
+  if (!name || name.length < 2) return false
+  if (/^[0-9\s\.\$円\-〜]+$/.test(name)) return false
   const categoryKeywords = [
     "とりあえず",
     "おすすめ",
@@ -272,23 +271,23 @@ function isValidMenuName(name: string): boolean {
     "カテゴリー",
     "分類",
     "種類",
-  ];
-  if (categoryKeywords.some((keyword) => name.includes(keyword))) return false;
-  return true;
+  ]
+  if (categoryKeywords.some((keyword) => name.includes(keyword))) return false
+  return true
 }
 
 async function saveMenuData(imageId: string, menuCollection: MenuCollection) {
   try {
-    const docRef = db.collection("menu_collections").doc();
+    const docRef = db.collection("menu_collections").doc()
     await docRef.set({
       ...menuCollection,
       created_at: admin.firestore.FieldValue.serverTimestamp(),
       updated_at: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    console.log(`${menuCollection.menus.length}個のメニューを保存しました`);
-    console.log("ドキュメントID:", docRef.id);
+    })
+    console.log(`${menuCollection.menus.length}個のメニューを保存しました`)
+    console.log("ドキュメントID:", docRef.id)
   } catch (error) {
-    console.error("Firestore保存エラー:", error);
-    throw error;
+    console.error("Firestore保存エラー:", error)
+    throw error
   }
 }
