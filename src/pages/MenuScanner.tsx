@@ -1,30 +1,25 @@
-import {
-  Box,
-  CircularProgress,
-  LinearProgress,
-  Typography,
-} from "@mui/material";
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Button from "../components/Button";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import { uploadImageToStorage } from "../services/imageUpload";
+import { Box, CircularProgress, LinearProgress, Typography } from "@mui/material"
+import { useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import Button from "../components/Button"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
+import { uploadImageToStorage } from "../services/imageUpload"
 // TODO: 将来のカメラ撮影機能実装時に使用予定
 // import { uploadCameraImageToStorage } from "../services/imageUpload"
 
 function MenuScanner() {
-  const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<string>("");
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState<string>("")
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
 
   const handleCameraScan = async () => {
-    console.log("Scan with Camera clicked");
-    setIsUploading(true);
-    setUploadStatus("カメラにアクセス中...");
-    setUploadProgress(0);
+    console.log("Scan with Camera clicked")
+    setIsUploading(true)
+    setUploadStatus("カメラにアクセス中...")
+    setUploadProgress(0)
 
     try {
       // カメラアクセスを要求
@@ -32,13 +27,13 @@ function MenuScanner() {
         video: {
           facingMode: "environment", // 背面カメラを優先
         },
-      });
+      })
 
       // カメラストリームが取得できた場合
       if (stream) {
-        console.log("Camera access granted");
-        setUploadStatus("写真を撮影中...");
-        setUploadProgress(30);
+        console.log("Camera access granted")
+        setUploadStatus("写真を撮影中...")
+        setUploadProgress(30)
 
         // TODO: 実際のカメラプレビューと撮影機能を実装
         // 現在は仮でcanvasを使って画像をキャプチャする処理を想定
@@ -52,100 +47,84 @@ function MenuScanner() {
 
         // 現在は一旦ストリームを停止
         for (const track of stream.getTracks()) {
-          track.stop();
+          track.stop()
         }
 
         // 仮の処理として直接遷移（実際の撮影・アップロード処理は後で実装）
-        setUploadProgress(100);
-        setUploadStatus("処理完了");
+        setUploadProgress(100)
+        setUploadStatus("処理完了")
         setTimeout(() => {
-          setIsUploading(false);
-          setUploadStatus("");
-          setUploadProgress(0);
-          navigate("/menu");
-        }, 1000);
+          setIsUploading(false)
+          setUploadStatus("")
+          setUploadProgress(0)
+          navigate("/menu")
+        }, 1000)
       }
     } catch (error) {
-      console.error("Camera access denied or not available:", error);
-      setIsUploading(false);
-      setUploadStatus("");
-      setUploadProgress(0);
+      console.error("Camera access denied or not available:", error)
+      setIsUploading(false)
+      setUploadStatus("")
+      setUploadProgress(0)
 
       if (error instanceof Error) {
         if (error.name === "NotAllowedError") {
           alert(
             "カメラへのアクセスが拒否されました。ブラウザの設定でカメラの使用を許可してください。"
-          );
+          )
         } else if (error.name === "NotFoundError") {
-          alert(
-            "カメラが見つかりません。デバイスにカメラが接続されているか確認してください。"
-          );
+          alert("カメラが見つかりません。デバイスにカメラが接続されているか確認してください。")
         } else {
-          alert(
-            "カメラアクセスエラーが発生しました。しばらく後でもう一度お試しください。"
-          );
+          alert("カメラアクセスエラーが発生しました。しばらく後でもう一度お試しください。")
         }
       } else {
-        alert(
-          "カメラへのアクセスが拒否されました。ブラウザの設定を確認してください。"
-        );
+        alert("カメラへのアクセスが拒否されました。ブラウザの設定を確認してください。")
       }
     }
-  };
+  }
 
   const handleUploadImage = () => {
-    console.log("Upload Image clicked");
+    console.log("Upload Image clicked")
     if (!isUploading && fileInputRef.current) {
-      fileInputRef.current.click();
+      fileInputRef.current.click()
     }
-  };
+  }
 
-  const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
 
-    console.log("File selected:", file.name);
-    console.log("File size:", (file.size / 1024 / 1024).toFixed(2), "MB");
-    console.log("File type:", file.type);
+    console.log("File selected:", file.name)
+    console.log("File size:", (file.size / 1024 / 1024).toFixed(2), "MB")
+    console.log("File type:", file.type)
 
-    setIsUploading(true);
-    setUploadStatus("画像をアップロード中...");
-    setUploadProgress(0);
+    setIsUploading(true)
+    setUploadStatus("画像をアップロード中...")
+    setUploadProgress(0)
 
     try {
       // Firebase Cloud Storageにアップロード（進捗コールバック付き）
-      const result = await uploadImageToStorage(
-        file,
-        "menuImages",
-        (progress) => {
-          setUploadProgress(progress);
-          if (progress < 25) {
-            setUploadStatus("アップロード準備中...");
-          } else if (progress < 75) {
-            setUploadStatus("画像をアップロード中...");
-          } else if (progress < 100) {
-            setUploadStatus("処理を完了中...");
-          } else {
-            setUploadStatus("アップロード完了!");
-          }
+      const result = await uploadImageToStorage(file, "menuImages", (progress) => {
+        setUploadProgress(progress)
+        if (progress < 25) {
+          setUploadStatus("アップロード準備中...")
+        } else if (progress < 75) {
+          setUploadStatus("画像をアップロード中...")
+        } else if (progress < 100) {
+          setUploadStatus("処理を完了中...")
+        } else {
+          setUploadStatus("アップロード完了!")
         }
-      );
+      })
 
-      console.log("アップロード成功:", result);
-      console.log(
-        "ファイルサイズ:",
-        (result.fileSize / 1024 / 1024).toFixed(2),
-        "MB"
-      );
-      console.log("Content Type:", result.contentType);
+      console.log("アップロード成功:", result)
+      console.log("ファイルサイズ:", (result.fileSize / 1024 / 1024).toFixed(2), "MB")
+      console.log("Content Type:", result.contentType)
 
       // アップロード成功後、Menu Analysisページに遷移
       setTimeout(() => {
-        setIsUploading(false);
-        setUploadStatus("");
-        setUploadProgress(0);
+        setIsUploading(false)
+        setUploadStatus("")
+        setUploadProgress(0)
         navigate("/menu", {
           state: {
             uploadedImage: result.downloadURL,
@@ -153,27 +132,27 @@ function MenuScanner() {
             fileSize: result.fileSize,
             contentType: result.contentType,
           },
-        });
-      }, 1000);
+        })
+      }, 1000)
     } catch (error) {
-      console.error("Upload error:", error);
-      setIsUploading(false);
-      setUploadStatus("");
-      setUploadProgress(0);
+      console.error("Upload error:", error)
+      setIsUploading(false)
+      setUploadStatus("")
+      setUploadProgress(0)
 
       // エラーメッセージを表示
       if (error instanceof Error) {
-        alert(error.message);
+        alert(error.message)
       } else {
-        alert("画像のアップロードに失敗しました。もう一度お試しください。");
+        alert("画像のアップロードに失敗しました。もう一度お試しください。")
       }
     }
 
     // ファイル入力をクリア
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = ""
     }
-  };
+  }
 
   return (
     <Box className="app-container">
@@ -343,7 +322,7 @@ function MenuScanner() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default MenuScanner;
+export default MenuScanner
