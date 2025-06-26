@@ -1,4 +1,4 @@
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "../firebase";
 
 /**
@@ -42,7 +42,6 @@ function validateImageFile(file: File): { isValid: boolean; error?: string } {
  */
 function sanitizeFileName(originalName: string): string {
   // 日本語文字や特殊文字を除去し、安全なファイル名を生成
-  const extension = originalName.split(".").pop() || "jpg";
   const baseName = originalName
     .replace(/\.[^/.]+$/, "") // 拡張子を除去
     .replace(/[^a-zA-Z0-9]/g, "") // 英数字以外を除去
@@ -60,7 +59,7 @@ function sanitizeFileName(originalName: string): string {
  */
 export async function uploadImageToStorage(
   file: File,
-  folder: string = "menuImages",
+  folder = "menuImages",
   progressCallback?: UploadProgressCallback
 ): Promise<{
   downloadURL: string;
@@ -123,13 +122,16 @@ export async function uploadImageToStorage(
         throw new Error(
           "アップロード権限がありません。管理者にお問い合わせください。"
         );
-      } else if (error.message.includes("storage/canceled")) {
+      }
+      if (error.message.includes("storage/canceled")) {
         throw new Error("アップロードがキャンセルされました。");
-      } else if (error.message.includes("storage/unknown")) {
+      }
+      if (error.message.includes("storage/unknown")) {
         throw new Error(
           "不明なエラーが発生しました。しばらく後でもう一度お試しください。"
         );
-      } else if (error.message.includes("storage/retry-limit-exceeded")) {
+      }
+      if (error.message.includes("storage/retry-limit-exceeded")) {
         throw new Error(
           "リトライ制限に達しました。ネットワーク接続を確認してください。"
         );
@@ -149,7 +151,7 @@ export async function uploadImageToStorage(
  */
 export async function uploadCameraImageToStorage(
   blob: Blob,
-  folder: string = "menuImages",
+  folder = "menuImages",
   progressCallback?: UploadProgressCallback
 ): Promise<{
   downloadURL: string;
@@ -212,9 +214,11 @@ export async function uploadCameraImageToStorage(
         throw new Error(
           "アップロード権限がありません。管理者にお問い合わせください。"
         );
-      } else if (error.message.includes("storage/canceled")) {
+      }
+      if (error.message.includes("storage/canceled")) {
         throw new Error("アップロードがキャンセルされました。");
-      } else if (error.message.includes("storage/unknown")) {
+      }
+      if (error.message.includes("storage/unknown")) {
         throw new Error(
           "不明なエラーが発生しました。しばらく後でもう一度お試しください。"
         );

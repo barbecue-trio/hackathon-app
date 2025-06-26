@@ -1,46 +1,44 @@
-import { Box, Typography } from "@mui/material";
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { Box, Typography } from "@mui/material"
+import { useEffect, useState } from "react"
+import { useLocation } from "react-router-dom"
 // Vite static asset import
-import menuItemImg from "../assets/images/menu-item-image.png";
-import CheckItem from "../components/CheckItem";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import MenuItem from "../components/MenuItem";
+import menuItemImg from "../assets/images/menu-item-image.png"
+import CheckItem from "../components/CheckItem"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
+import MenuItem from "../components/MenuItem"
 
 interface LocationState {
-  uploadedImage?: string;
-  imagePath?: string;
-  fileSize?: number;
-  contentType?: string;
+  uploadedImage?: string
+  imagePath?: string
+  fileSize?: number
+  contentType?: string
 }
 
 function Menu() {
-  const location = useLocation();
-  const state = location.state as LocationState;
+  const location = useLocation()
+  const state = location.state as LocationState
 
   // Dietary Restrictions state
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<
-    Record<string, boolean>
-  >({
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<Record<string, boolean>>({
     Vegetarian: false,
     "No Pork": false,
-  });
+  })
 
   // アップロードされた画像の情報をログ出力
   useEffect(() => {
     if (state?.uploadedImage) {
-      console.log("アップロードされた画像URL:", state.uploadedImage);
-      console.log("アップロードされた画像パス:", state.imagePath);
+      console.log("アップロードされた画像URL:", state.uploadedImage)
+      console.log("アップロードされた画像パス:", state.imagePath)
     }
-  }, [state]);
+  }, [state])
 
   const handleDietaryChange = (restriction: string, checked: boolean) => {
     setDietaryRestrictions((prev) => ({
       ...prev,
       [restriction]: checked,
-    }));
-  };
+    }))
+  }
 
   const menuItems = [
     {
@@ -58,7 +56,7 @@ function Menu() {
       ingredients: "Contains: Tofu, Vegetables",
       imageSrc: menuItemImg,
     },
-  ];
+  ]
 
   return (
     <Box className="app-container">
@@ -133,8 +131,7 @@ function Menu() {
                       color: "#666",
                     }}
                   >
-                    <strong>ファイルサイズ:</strong>{" "}
-                    {(state.fileSize / 1024 / 1024).toFixed(2)} MB
+                    <strong>ファイルサイズ:</strong> {(state.fileSize / 1024 / 1024).toFixed(2)} MB
                   </Typography>
                 )}
 
@@ -204,18 +201,14 @@ function Menu() {
               width: "100%",
             }}
           >
-            {Object.entries(dietaryRestrictions).map(
-              ([restriction, checked]) => (
-                <CheckItem
-                  key={restriction}
-                  label={restriction}
-                  checked={checked}
-                  onChange={(newChecked) =>
-                    handleDietaryChange(restriction, newChecked)
-                  }
-                />
-              )
-            )}
+            {Object.entries(dietaryRestrictions).map(([restriction, checked]) => (
+              <CheckItem
+                key={restriction}
+                label={restriction}
+                checked={checked}
+                onChange={(newChecked) => handleDietaryChange(restriction, newChecked)}
+              />
+            ))}
             {/* Additional Vegetarian item as shown in Figma */}
             <CheckItem label="Vegetarian" checked={false} onChange={() => {}} />
           </Box>
@@ -272,7 +265,7 @@ function Menu() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default Menu;
+export default Menu
