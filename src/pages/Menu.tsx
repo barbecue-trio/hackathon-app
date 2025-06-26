@@ -42,121 +42,119 @@ function Menu() {
   ];
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        minHeight: "100vh",
-        backgroundColor: "#FFFFFF",
-        width: "100%",
-        maxWidth: 390,
-        margin: "0 auto",
-      }}
-    >
-      {/* Main Content */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          width: "100%",
-        }}
-      >
-        {/* Header */}
-        <Header title="Menu Analysis" />
+    <Box className="app-container">
+      <Box className="page-container">
+        {/* Main Content */}
+        <Box className="main-content with-footer scrollable">
+          {/* Header */}
+          <Header title="Menu Analysis" />
 
-        {/* Dietary Restrictions Section */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            padding: "20px 16px 12px",
-            width: "100%",
-          }}
-        >
-          <Typography
+          {/* Dietary Restrictions Section */}
+          <Box
             sx={{
-              fontFamily: '"Spline Sans", "Roboto", sans-serif',
-              fontWeight: 700,
-              fontSize: 22,
-              lineHeight: "1.2727272727272727em",
-              textAlign: "left",
-              color: "#121217",
+              display: "flex",
+              flexDirection: "column",
+              padding: {
+                xs: "16px 16px 12px",
+                sm: "20px 16px 12px",
+              },
               width: "100%",
             }}
           >
-            Dietary Restrictions
-          </Typography>
-        </Box>
+            <Typography
+              sx={{
+                fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                fontWeight: 700,
+                fontSize: {
+                  xs: "20px",
+                  sm: "22px",
+                },
+                lineHeight: "1.2727272727272727em",
+                textAlign: "left",
+                color: "#121217",
+                width: "100%",
+              }}
+            >
+              Dietary Restrictions
+            </Typography>
+          </Box>
 
-        {/* Dietary Restrictions Check Items */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            padding: "0px 16px",
-            width: "100%",
-          }}
-        >
-          {Object.entries(dietaryRestrictions).map(([restriction, checked]) => (
-            <CheckItem
-              key={restriction}
-              label={restriction}
-              checked={checked}
-              onChange={(newChecked) =>
-                handleDietaryChange(restriction, newChecked)
-              }
-            />
-          ))}
-          {/* Additional Vegetarian item as shown in Figma */}
-          <CheckItem label="Vegetarian" checked={false} onChange={() => {}} />
-        </Box>
-
-        {/* Menu Items Section */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            padding: "20px 16px 12px",
-            width: "100%",
-          }}
-        >
-          <Typography
+          {/* Dietary Restrictions Check Items */}
+          <Box
             sx={{
-              fontFamily: '"Spline Sans", "Roboto", sans-serif',
-              fontWeight: 700,
-              fontSize: 22,
-              lineHeight: "1.2727272727272727em",
-              textAlign: "left",
-              color: "#121217",
+              display: "flex",
+              flexDirection: "column",
+              padding: "0px 16px",
               width: "100%",
             }}
           >
-            Menu Items
-          </Typography>
+            {Object.entries(dietaryRestrictions).map(
+              ([restriction, checked]) => (
+                <CheckItem
+                  key={restriction}
+                  label={restriction}
+                  checked={checked}
+                  onChange={(newChecked) =>
+                    handleDietaryChange(restriction, newChecked)
+                  }
+                />
+              )
+            )}
+            {/* Additional Vegetarian item as shown in Figma */}
+            <CheckItem label="Vegetarian" checked={false} onChange={() => {}} />
+          </Box>
+
+          {/* Menu Items Section */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              padding: {
+                xs: "16px 16px 12px",
+                sm: "20px 16px 12px",
+              },
+              width: "100%",
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                fontWeight: 700,
+                fontSize: {
+                  xs: "20px",
+                  sm: "22px",
+                },
+                lineHeight: "1.2727272727272727em",
+                textAlign: "left",
+                color: "#121217",
+                width: "100%",
+              }}
+            >
+              Menu Items
+            </Typography>
+          </Box>
+
+          {/* Menu Items List */}
+          <Box
+            sx={{
+              width: "100%",
+              backgroundColor: "#FFFFFF",
+            }}
+          >
+            {menuItems.map((item, index) => (
+              <MenuItem
+                key={index}
+                title={item.title}
+                ingredients={item.ingredients}
+                imageSrc={item.imageSrc}
+              />
+            ))}
+          </Box>
         </Box>
 
-        {/* Menu Items List */}
-        <Box
-          sx={{
-            width: "100%",
-            backgroundColor: "#FFFFFF",
-          }}
-        >
-          {menuItems.map((item, index) => (
-            <MenuItem
-              key={index}
-              title={item.title}
-              ingredients={item.ingredients}
-              imageSrc={item.imageSrc}
-            />
-          ))}
-        </Box>
+        {/* Footer */}
+        <Footer />
       </Box>
-
-      {/* Footer */}
-      <Footer />
     </Box>
   );
 }
