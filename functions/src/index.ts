@@ -110,9 +110,16 @@ export const processMenuImage = onRequest(
 
       console.log("メニュー情報の保存が完了しました。ドキュメントID:", documentId)
 
-      // 食文化生成処理を非同期で開始（並列処理）
-      generateFoodCultureForDocument(documentId).catch((error: unknown) => {
-        console.error("食文化生成処理でエラーが発生しました:", error)
+      // 食文化生成処理とカテゴリー生成処理を並列で開始
+      Promise.all([
+        generateFoodCultureForDocument(documentId).catch((error: unknown) => {
+          console.error("食文化生成処理でエラーが発生しました:", error)
+        }),
+        generateCategoriesForDocument(documentId).catch((error: unknown) => {
+          console.error("カテゴリー生成処理でエラーが発生しました:", error)
+        }),
+      ]).catch((error: unknown) => {
+        console.error("並列処理でエラーが発生しました:", error)
       })
 
       // 成功レスポンス
@@ -180,6 +187,53 @@ export const generateFoodCulture = onRequest(
   }
 )
 
+// カテゴリー生成専用エンドポイント
+export const generateCategories = onRequest(
+  {
+    cors: true,
+    region: "asia-northeast1",
+    memory: "512MiB",
+  },
+  async (request, response) => {
+    try {
+      // POSTリクエストのみ許可
+      if (request.method !== "POST") {
+        response.status(405).json({
+          success: false,
+          error: "Method not allowed. Use POST.",
+        })
+        return
+      }
+
+      const { documentId }: GenerateFoodCultureRequest = request.body
+
+      if (!documentId) {
+        response.status(400).json({
+          success: false,
+          error: "documentId is required",
+        })
+        return
+      }
+
+      // カテゴリー生成処理を実行
+      const processedCount = await generateCategoriesForDocument(documentId)
+
+      const responseData: GenerateFoodCultureResponse = {
+        success: true,
+        processedCount: processedCount,
+      }
+
+      response.status(200).json(responseData)
+    } catch (error) {
+      console.error("カテゴリー生成エラーが発生しました:", error)
+      response.status(500).json({
+        success: false,
+        error: "Internal server error",
+      })
+    }
+  }
+)
+
 // テスト用エンドポイント
 export const testProcessMenuImage = onRequest(
   {
@@ -235,9 +289,16 @@ export const testProcessMenuImage = onRequest(
 
       console.log("メニュー情報の保存が完了しました。ドキュメントID:", documentId)
 
-      // 食文化生成処理を非同期で開始（並列処理）
-      generateFoodCultureForDocument(documentId).catch((error: unknown) => {
-        console.error("食文化生成処理でエラーが発生しました:", error)
+      // 食文化生成処理とカテゴリー生成処理を並列で開始
+      Promise.all([
+        generateFoodCultureForDocument(documentId).catch((error: unknown) => {
+          console.error("食文化生成処理でエラーが発生しました:", error)
+        }),
+        generateCategoriesForDocument(documentId).catch((error: unknown) => {
+          console.error("カテゴリー生成処理でエラーが発生しました:", error)
+        }),
+      ]).catch((error: unknown) => {
+        console.error("並列処理でエラーが発生しました:", error)
       })
 
       // 成功レスポンス
@@ -590,4 +651,134 @@ Please answer in English, 50-100 characters, concise and informative.
   }
 
   return "Failed to generate food culture information."
+}
+
+// カテゴリー生成のメイン関数
+async function generateCategoriesForDocument(documentId: string): Promise<number> {
+  try {
+    const docRef = db.collection("menu_collections").doc(documentId)
+    const doc = await docRef.get()
+
+    if (!doc.exists) {
+      throw new Error(`ドキュメント ${documentId} が見つかりません`)
+    }
+
+    const menuCollection = doc.data() as MenuCollection
+
+    const batchSize = 3 // 一度に処理するメニュー数（AI呼び出しのため小さめに設定）
+    const delayBetweenBatches = 2000 // バッチ間の待機時間（ミリ秒）
+    const delayBetweenRequests = 1000 // リクエスト間の待機時間（ミリ秒）
+
+    const results: { index: number; categoryId: number }[] = []
+
+    for (let i = 0; i < menuCollection.menus.length; i += batchSize) {
+      const batch = menuCollection.menus.slice(i, i + batchSize)
+      console.log(
+        `カテゴリー生成バッチ ${Math.floor(i / batchSize) + 1}/${Math.ceil(
+          menuCollection.menus.length / batchSize
+        )} を処理中...`
+      )
+
+      // バッチ内で並列処理
+      const batchPromises = batch.map(async (menu, batchIndex) => {
+        const globalIndex = i + batchIndex
+        try {
+          console.log(
+            `メニュー ${globalIndex + 1}/${menuCollection.menus.length}: ${
+              menu.name
+            } のカテゴリーをAIで判定中...`
+          )
+
+          // リクエスト間に少し待機時間を設ける
+          if (batchIndex > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delayBetweenRequests))
+          }
+
+          const categoryId = await determineCategoryFromMenuName(menu.name, menu.name_jp)
+          return { index: globalIndex, categoryId }
+        } catch (error) {
+          console.error(`メニュー ${menu.name} のカテゴリー判定でエラー:`, error)
+          return {
+            index: globalIndex,
+            categoryId: 5, // その他
+          }
+        }
+      })
+
+      const batchResults = await Promise.all(batchPromises)
+      results.push(...batchResults)
+
+      if (i + batchSize < menuCollection.menus.length) {
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches))
+      }
+    }
+
+    const updatedMenus = [...menuCollection.menus]
+    for (const { index, categoryId } of results) {
+      updatedMenus[index].category_id = categoryId.toString()
+    }
+
+    // Firestoreを更新
+    await docRef.update({
+      menus: updatedMenus,
+      updated_at: admin.firestore.FieldValue.serverTimestamp(),
+    })
+
+    return results.length
+  } catch (error) {
+    console.error("カテゴリー生成処理でエラーが発生しました:", error)
+    throw error
+  }
+}
+
+// メニュー名からカテゴリーIDを判定する関数
+async function determineCategoryFromMenuName(name: string, nameJp: string): Promise<number> {
+  try {
+    const apiKey = geminiApiKey.value()
+    if (!apiKey) {
+      throw new Error("Gemini API key not configured")
+    }
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+    const prompt = `
+以下のメニュー名を分析して、最も適切なカテゴリーIDを選んでください：
+
+メニュー名（英語）: ${name}
+メニュー名（日本語）: ${nameJp}
+
+カテゴリー分類：
+1. 麺系 - ラーメン、うどん、そば、パスタ、スパゲッティなどの麺料理
+2. 鍋系 - すき焼き、しゃぶしゃぶ、キムチ鍋、鍋物などの鍋料理
+3. 刺身系 - 刺身、カルパッチョ、タルタル、生魚料理など
+4. 寿司 - 握り寿司、巻き寿司、手巻き寿司などの寿司料理
+5. その他 - 上記のカテゴリーに該当しない料理
+
+必ず1から5の数字のみで回答してください。説明は不要です。
+例：
+- ラーメン → 1
+- すき焼き → 2
+- 刺身盛り合わせ → 3
+- 握り寿司 → 4
+- 焼き鳥 → 5
+`
+
+    const result = await model.generateContent(prompt)
+    const text = result.response.text().trim()
+
+    const numberMatch = text.match(/\d+/)
+    if (numberMatch) {
+      const categoryId = parseInt(numberMatch[0])
+      if (categoryId >= 1 && categoryId <= 5) {
+        return categoryId
+      }
+    }
+
+    console.warn(`AIの回答が不正でした: "${text}"。デフォルト値5を使用します。`)
+    return 5
+  } catch (error) {
+    console.error(`カテゴリー判定でエラーが発生しました: ${name}`, error)
+    // エラーの場合はデフォルトで5（その他）を返す
+    return 5
+  }
 }
