@@ -65,7 +65,12 @@ export const processMenuImage = onRequest(
       }
 
       console.log("ストレージIDが受け取られました:", storageId);
-      const gcsUri = `gs://${bucket.value()}/${storageId}`;
+
+      // storageIdにmenuImages/プレフィックスが含まれていない場合は追加
+      const fullStorageId = storageId.startsWith("menuImages/")
+        ? storageId
+        : `menuImages/${storageId}`;
+      const gcsUri = `gs://${bucket.value()}/${fullStorageId}`;
 
       // Google AIでメニュー情報を抽出
       const menuNames = await extractMenuWithGoogleAI(gcsUri);
@@ -94,7 +99,7 @@ export const processMenuImage = onRequest(
       console.log("保存用メニューコレクション:", menuCollection);
 
       // Firestoreにメニュー情報を保存
-      const documentId = await saveMenuData(storageId, menuCollection);
+      const documentId = await saveMenuData(menuCollection);
 
       console.log(
         "メニュー情報の保存が完了しました。ドキュメントID:",
@@ -139,7 +144,12 @@ export const testProcessMenuImage = onRequest(
 
       const testStorageId = "menuImages/testMenu.webp";
       console.log("テスト用ストレージID:", testStorageId);
-      const gcsUri = `gs://${bucket.value()}/${testStorageId}`;
+
+      // storageIdにmenuImages/プレフィックスが含まれていない場合は追加
+      const fullStorageId = testStorageId.startsWith("menuImages/")
+        ? testStorageId
+        : `menuImages/${testStorageId}`;
+      const gcsUri = `gs://${bucket.value()}/${fullStorageId}`;
 
       // Google AIでメニュー情報を抽出
       const menuNames = await extractMenuWithGoogleAI(gcsUri);
@@ -168,7 +178,7 @@ export const testProcessMenuImage = onRequest(
       console.log("保存用メニューコレクション:", menuCollection);
 
       // Firestoreにメニュー情報を保存
-      const documentId = await saveMenuData(testStorageId, menuCollection);
+      const documentId = await saveMenuData(menuCollection);
 
       console.log(
         "メニュー情報の保存が完了しました。ドキュメントID:",
@@ -392,7 +402,7 @@ function isValidMenuName(name: string): boolean {
   return true;
 }
 
-async function saveMenuData(imageId: string, menuCollection: MenuCollection) {
+async function saveMenuData(menuCollection: MenuCollection) {
   try {
     const docRef = db.collection("menu_collections").doc();
     await docRef.set({
