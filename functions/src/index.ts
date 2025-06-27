@@ -542,7 +542,7 @@ async function generateFoodCultureForDocument(documentId: string): Promise<numbe
 
     const menuCollection = doc.data() as MenuCollection
 
-    const batchSize = 5 // 一度に処理するメニュー数
+    const batchSize = 10 // 一度に処理するメニュー数
     const delayBetweenBatches = 1000 // バッチ間の待機時間（ミリ秒）
     const delayBetweenRequests = 500 // リクエスト間の待機時間（ミリ秒）
 
@@ -665,57 +665,15 @@ async function generateCategoriesForDocument(documentId: string): Promise<number
 
     const menuCollection = doc.data() as MenuCollection
 
-    const batchSize = 3 // 一度に処理するメニュー数（AI呼び出しのため小さめに設定）
-    const delayBetweenBatches = 2000 // バッチ間の待機時間（ミリ秒）
-    const delayBetweenRequests = 1000 // リクエスト間の待機時間（ミリ秒）
+    console.log(`${menuCollection.menus.length}個のメニューのカテゴリーを一括でAI判定中...`)
 
-    const results: { index: number; categoryId: number }[] = []
-
-    for (let i = 0; i < menuCollection.menus.length; i += batchSize) {
-      const batch = menuCollection.menus.slice(i, i + batchSize)
-      console.log(
-        `カテゴリー生成バッチ ${Math.floor(i / batchSize) + 1}/${Math.ceil(
-          menuCollection.menus.length / batchSize
-        )} を処理中...`
-      )
-
-      // バッチ内で並列処理
-      const batchPromises = batch.map(async (menu, batchIndex) => {
-        const globalIndex = i + batchIndex
-        try {
-          console.log(
-            `メニュー ${globalIndex + 1}/${menuCollection.menus.length}: ${
-              menu.name
-            } のカテゴリーをAIで判定中...`
-          )
-
-          // リクエスト間に少し待機時間を設ける
-          if (batchIndex > 0) {
-            await new Promise((resolve) => setTimeout(resolve, delayBetweenRequests))
-          }
-
-          const categoryId = await determineCategoryFromMenuName(menu.name, menu.name_jp)
-          return { index: globalIndex, categoryId }
-        } catch (error) {
-          console.error(`メニュー ${menu.name} のカテゴリー判定でエラー:`, error)
-          return {
-            index: globalIndex,
-            categoryId: 5, // その他
-          }
-        }
-      })
-
-      const batchResults = await Promise.all(batchPromises)
-      results.push(...batchResults)
-
-      if (i + batchSize < menuCollection.menus.length) {
-        await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches))
-      }
-    }
+    // 全メニューをまとめてAIに投げてカテゴリー判定
+    const categoryResults = await determineCategoriesForAllMenus(menuCollection.menus)
 
     const updatedMenus = [...menuCollection.menus]
-    for (const { index, categoryId } of results) {
-      updatedMenus[index].category_id = categoryId.toString()
+    for (let i = 0; i < updatedMenus.length; i++) {
+      updatedMenus[i].category_id = categoryResults[i].toString()
+      console.log(`カテゴリーID ${categoryResults[i]} を割り当てました: ${updatedMenus[i].name}`)
     }
 
     // Firestoreを更新
@@ -724,11 +682,110 @@ async function generateCategoriesForDocument(documentId: string): Promise<number
       updated_at: admin.firestore.FieldValue.serverTimestamp(),
     })
 
-    return results.length
+    return updatedMenus.length
   } catch (error) {
     console.error("カテゴリー生成処理でエラーが発生しました:", error)
     throw error
   }
+}
+
+// 全メニューのカテゴリーを一括で判定する関数
+async function determineCategoriesForAllMenus(menus: MenuItem[]): Promise<number[]> {
+  try {
+    const apiKey = geminiApiKey.value()
+    if (!apiKey) {
+      throw new Error("Gemini API key not configured")
+    }
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+    // メニューリストを作成
+    const menuList = menus
+      .map((menu, index) => `${index + 1}. ${menu.name} (${menu.name_jp})`)
+      .join("\n")
+
+    const prompt = `
+以下のメニューリストの各メニューに対して、最も適切なカテゴリーIDを選んでください：
+
+メニューリスト：
+${menuList}
+
+カテゴリー分類：
+1. 麺系 - ラーメン、うどん、そば、パスタ、スパゲッティなどの麺料理
+2. 鍋系 - すき焼き、しゃぶしゃぶ、キムチ鍋、鍋物などの鍋料理
+3. 刺身系 - 刺身、カルパッチョ、タルタル、生魚料理など
+4. 寿司 - 握り寿司、巻き寿司、手巻き寿司などの寿司料理
+5. その他 - 上記のカテゴリーに該当しない料理
+
+必ず以下の形式でJSON配列で回答してください：
+[1, 2, 3, 4, 5, ...]
+
+各数字は対応するメニューのカテゴリーIDです。
+例：
+- ラーメン → 1
+- すき焼き → 2
+- 刺身盛り合わせ → 3
+- 握り寿司 → 4
+- 焼き鳥 → 5
+
+説明は不要で、数字の配列のみで回答してください。
+`
+
+    const result = await model.generateContent(prompt)
+    const text = result.response.text().trim()
+
+    console.log("AIの回答:", text)
+
+    // JSON配列を抽出
+    const jsonMatch = text.match(/\[[\s\S]*\]/)
+    if (jsonMatch) {
+      try {
+        const categoryIds = JSON.parse(jsonMatch[0])
+        if (Array.isArray(categoryIds) && categoryIds.length === menus.length) {
+          // 各IDが1-5の範囲内かチェック
+          const validIds = categoryIds.map((id) => {
+            const numId = parseInt(id)
+            return numId >= 1 && numId <= 5 ? numId : 5
+          })
+          return validIds
+        }
+      } catch (parseError) {
+        console.error("JSON解析エラー:", parseError)
+      }
+    }
+
+    // AIの回答が不正な場合は、個別に判定
+    console.warn(`AIの一括回答が不正でした: "${text}"。個別判定にフォールバックします。`)
+    return await determineCategoriesIndividually(menus)
+  } catch (error) {
+    console.error("一括カテゴリー判定でエラーが発生しました:", error)
+    // エラーの場合は個別判定にフォールバック
+    return await determineCategoriesIndividually(menus)
+  }
+}
+
+// 個別判定のフォールバック関数
+async function determineCategoriesIndividually(menus: MenuItem[]): Promise<number[]> {
+  console.log("個別判定でカテゴリーを判定中...")
+  const results: number[] = []
+
+  for (let i = 0; i < menus.length; i++) {
+    try {
+      const categoryId = await determineCategoryFromMenuName(menus[i].name, menus[i].name_jp)
+      results.push(categoryId)
+      console.log(`個別判定: ${menus[i].name} → カテゴリーID ${categoryId}`)
+    } catch (error) {
+      console.error(`個別判定でエラー: ${menus[i].name}`, error)
+      results.push(5) // デフォルト値
+    }
+
+    // リクエスト間に少し待機時間を設ける
+    if (i < menus.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
+  }
+
+  return results
 }
 
 // メニュー名からカテゴリーIDを判定する関数
