@@ -369,7 +369,8 @@ async function extractMenuWithGoogleAI(
               // 文字列の場合は、英語名を生成する
               console.log(`文字列アイテム: ${item}`);
               return { name: item, name_jp: item };
-            } else if (
+            }
+            if (
               item &&
               typeof item === "object" &&
               "name" in item &&
@@ -377,10 +378,9 @@ async function extractMenuWithGoogleAI(
             ) {
               console.log(`オブジェクトアイテム: ${JSON.stringify(item)}`);
               return { name: item.name, name_jp: item.name_jp };
-            } else {
-              console.log(`無効なアイテム: ${JSON.stringify(item)}`);
-              return { name: "", name_jp: "" };
             }
+            console.log(`無効なアイテム: ${JSON.stringify(item)}`);
+            return { name: "", name_jp: "" };
           })
           .filter((item) => item.name && item.name_jp);
 
@@ -559,9 +559,9 @@ async function generateFoodCultureForDocument(
     }
 
     const updatedMenus = [...menuCollection.menus];
-    results.forEach(({ index, foodCulture }) => {
+    for (const { index, foodCulture } of results) {
       updatedMenus[index].food_culture = foodCulture;
-    });
+    }
 
     // Firestoreを更新
     await docRef.update({
