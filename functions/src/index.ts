@@ -108,18 +108,12 @@ export const processMenuImage = onRequest(
 
       const documentId = await saveMenuData(menuCollection)
 
-      console.log("メニュー情報の保存が完了しました。ドキュメントID:", documentId)
+      await generateCategoriesForDocument(documentId).catch((error: unknown) => {
+        console.error("カテゴリー生成処理でエラーが発生しました:", error)
+      })
 
-      // 食文化生成処理とカテゴリー生成処理を並列で開始
-      Promise.all([
-        generateFoodCultureForDocument(documentId).catch((error: unknown) => {
-          console.error("食文化生成処理でエラーが発生しました:", error)
-        }),
-        generateCategoriesForDocument(documentId).catch((error: unknown) => {
-          console.error("カテゴリー生成処理でエラーが発生しました:", error)
-        }),
-      ]).catch((error: unknown) => {
-        console.error("並列処理でエラーが発生しました:", error)
+      generateFoodCultureForDocument(documentId).catch((error: unknown) => {
+        console.error("食文化生成処理でエラーが発生しました:", error)
       })
 
       // 成功レスポンス
@@ -287,18 +281,12 @@ export const testProcessMenuImage = onRequest(
 
       const documentId = await saveMenuData(menuCollection)
 
-      console.log("メニュー情報の保存が完了しました。ドキュメントID:", documentId)
+      await generateCategoriesForDocument(documentId).catch((error: unknown) => {
+        console.error("カテゴリー生成処理でエラーが発生しました:", error)
+      })
 
-      // 食文化生成処理とカテゴリー生成処理を並列で開始
-      Promise.all([
-        generateFoodCultureForDocument(documentId).catch((error: unknown) => {
-          console.error("食文化生成処理でエラーが発生しました:", error)
-        }),
-        generateCategoriesForDocument(documentId).catch((error: unknown) => {
-          console.error("カテゴリー生成処理でエラーが発生しました:", error)
-        }),
-      ]).catch((error: unknown) => {
-        console.error("並列処理でエラーが発生しました:", error)
+      generateFoodCultureForDocument(documentId).catch((error: unknown) => {
+        console.error("食文化生成処理でエラーが発生しました:", error)
       })
 
       // 成功レスポンス
@@ -673,7 +661,6 @@ async function generateCategoriesForDocument(documentId: string): Promise<number
     const updatedMenus = [...menuCollection.menus]
     for (let i = 0; i < updatedMenus.length; i++) {
       updatedMenus[i].category_id = categoryResults[i].toString()
-      console.log(`カテゴリーID ${categoryResults[i]} を割り当てました: ${updatedMenus[i].name}`)
     }
 
     // Firestoreを更新
@@ -773,7 +760,6 @@ async function determineCategoriesIndividually(menus: MenuItem[]): Promise<numbe
     try {
       const categoryId = await determineCategoryFromMenuName(menus[i].name, menus[i].name_jp)
       results.push(categoryId)
-      console.log(`個別判定: ${menus[i].name} → カテゴリーID ${categoryId}`)
     } catch (error) {
       console.error(`個別判定でエラー: ${menus[i].name}`, error)
       results.push(5) // デフォルト値
