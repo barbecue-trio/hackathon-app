@@ -65,7 +65,12 @@ export const processMenuImage = onRequest(
       }
 
       console.log("ストレージIDが受け取られました:", storageId)
-      const gcsUri = `gs://${bucket.value()}/${storageId}`
+
+      // storageIdにmenuImages/プレフィックスが含まれていない場合は追加
+      const fullStorageId = storageId.startsWith("menuImages/")
+        ? storageId
+        : `menuImages/${storageId}`
+      const gcsUri = `gs://${bucket.value()}/${fullStorageId}`
 
       // Google AIでメニュー情報を抽出
       const menuNames = await extractMenuWithGoogleAI(gcsUri)
@@ -94,7 +99,7 @@ export const processMenuImage = onRequest(
       console.log("保存用メニューコレクション:", menuCollection)
 
       // Firestoreにメニュー情報を保存
-      const documentId = await saveMenuData(storageId, menuCollection)
+      const documentId = await saveMenuData(menuCollection)
 
       console.log("メニュー情報の保存が完了しました。ドキュメントID:", documentId)
 
@@ -108,6 +113,82 @@ export const processMenuImage = onRequest(
       response.status(200).json(responseData)
     } catch (error) {
       console.error("エラーが発生しました:", error)
+      response.status(500).json({
+        success: false,
+        error: "Internal server error",
+      })
+    }
+  }
+)
+
+// テスト用エンドポイント
+export const testProcessMenuImage = onRequest(
+  {
+    cors: true,
+    region: "asia-northeast1",
+    memory: "512MiB",
+  },
+  async (request, response) => {
+    try {
+      // GETリクエストでテスト用の固定画像を使用
+      if (request.method !== "GET") {
+        response.status(405).json({
+          success: false,
+          error: "Method not allowed. Use GET for testing.",
+        })
+        return
+      }
+
+      const testStorageId = "menuImages/testMenu.webp"
+      console.log("テスト用ストレージID:", testStorageId)
+
+      // storageIdにmenuImages/プレフィックスが含まれていない場合は追加
+      const fullStorageId = testStorageId.startsWith("menuImages/")
+        ? testStorageId
+        : `menuImages/${testStorageId}`
+      const gcsUri = `gs://${bucket.value()}/${fullStorageId}`
+
+      // Google AIでメニュー情報を抽出
+      const menuNames = await extractMenuWithGoogleAI(gcsUri)
+      console.log("抽出されたメニュー名:", menuNames)
+
+      if (menuNames.length === 0) {
+        response.status(400).json({
+          success: false,
+          error: "メニュー名が抽出できませんでした",
+        })
+        return
+      }
+
+      // 新しいデータ構造でメニュー情報を作成
+      const menuCollection: MenuCollection = {
+        menus: menuNames.map((menuName) => ({
+          name: menuName,
+          image_id: "",
+          ingredients: [],
+          allergy_ids: [],
+          dietary_restriction_ids: [],
+          category_id: "",
+        })),
+      }
+
+      console.log("保存用メニューコレクション:", menuCollection)
+
+      // Firestoreにメニュー情報を保存
+      const documentId = await saveMenuData(menuCollection)
+
+      console.log("メニュー情報の保存が完了しました。ドキュメントID:", documentId)
+
+      // 成功レスポンス
+      const responseData: ProcessImageResponse = {
+        success: true,
+        documentId: documentId,
+        menuCount: menuNames.length,
+      }
+
+      response.status(200).json(responseData)
+    } catch (error) {
+      console.error("テストエラーが発生しました:", error)
       response.status(500).json({
         success: false,
         error: "Internal server error",
@@ -314,7 +395,7 @@ function isValidMenuName(name: string): boolean {
   return true
 }
 
-async function saveMenuData(imageId: string, menuCollection: MenuCollection) {
+async function saveMenuData(menuCollection: MenuCollection) {
   try {
     const docRef = db.collection("menu_collections").doc()
     await docRef.set({
