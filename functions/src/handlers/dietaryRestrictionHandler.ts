@@ -4,6 +4,8 @@ import {
   checkReligiousRestriction,
   generateIngredients,
 } from "../services/aiService"
+import { getMenuCollection, updateMenuCollection } from "../services/firestoreService"
+import type { MenuCollection } from "../types"
 
 export async function handleCheckDietaryRestrictions(
   request: Request,
@@ -29,23 +31,31 @@ export async function handleCheckDietaryRestrictions(
       return
     }
 
-    const ingredients = await generateIngredients("豚の角煮")
-    console.log("Generated ingredients:", ingredients)
-    const allergens = await checkAllergen(ingredients, [3, 27])
-    const religiousRestrictions = await checkReligiousRestriction(ingredients, [1])
+    const menuCollection = await getMenuCollection(documentId)
+    if (!menuCollection || !menuCollection.menus) {
+      response.status(404).json({ error: "No menus found in the document" })
+      return
+    }
+    const menus = menuCollection.menus
+    const updatedMenus = await Promise.all(
+      menus.map(async (menu) => {
+        const ingredients = await generateIngredients(menu.name)
+        const allergenIds = await checkAllergen(ingredients)
+        const religiousRestrictionIds = await checkReligiousRestriction(ingredients)
+        return {
+          ...menu,
+          dietary_restriction_ids: religiousRestrictionIds,
+          allergy_ids: allergenIds,
+          ingredients: ingredients,
+        }
+      })
+    )
+    const updatedMenuCollection: MenuCollection = {
+      menus: updatedMenus,
+    }
+    await updateMenuCollection(documentId, updatedMenuCollection)
 
-    response.status(200).json({
-      success: true,
-      message: "食事制限チェックが完了しました",
-      data: {
-        documentId: documentId,
-        ingredients: ingredients,
-        allergens: allergens,
-        religiousRestrictions: religiousRestrictions,
-      },
-    })
-
-    // response.sendStatus(200)
+    response.sendStatus(200)
   } catch (error) {
     console.error("食事制限チェックでエラーが発生しました:", error)
     response.status(500).json({
