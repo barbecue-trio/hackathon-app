@@ -1,5 +1,5 @@
 import { onRequest } from "firebase-functions/v2/https"
-import { handleGenerateMenuImage } from "../../handlers/menuImageHandler"
+import { handleGenerateMenuImage } from "../../handlers/menuItemHandler"
 
 // メニュー画像専用エンドポイント
 export const generateMenuImage = onRequest(
