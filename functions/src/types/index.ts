@@ -34,3 +34,8 @@ export interface GenerateFoodCultureResponse {
   error?: string
   processedCount?: number
 }
+
+export interface GeneratedImage {
+  base64: string
+  mimeType: string
+}
