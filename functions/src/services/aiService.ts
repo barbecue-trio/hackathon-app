@@ -1,11 +1,17 @@
 import { GoogleGenAI, Modality } from "@google/genai"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { geminiApiKey } from "../config"
+import { allergyIdMap, allergyNameToIdMap } from "../data/allergens"
+import {
+  religiousRestrictionIdMap,
+  religiousRestrictionNameToIdMap,
+} from "../data/religiousRestrictions"
 import type { GeneratedImage, MenuItem } from "../types"
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
 
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"
-const imageModelAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" })
+const MODEL = "gemini-1.5-flash"
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" })
 
 export async function extractMenuWithGoogleAI(
   gcsUri: string
@@ -19,7 +25,7 @@ export async function extractMenuWithGoogleAI(
 
     const imageData = await fetchImageAsBase64(gcsUri)
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: MODEL })
 
     const prompt = `
 この画像は居酒屋のメニューです。以下の条件でメニュー名を抽出してください：
@@ -173,7 +179,7 @@ export async function generateFoodCultureWithAI(menuName: string): Promise<strin
         throw new Error("Gemini API key not configured")
       }
       const genAI = new GoogleGenerativeAI(apiKey)
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+      const model = genAI.getGenerativeModel({ model: MODEL })
 
       const prompt = `
 Please provide a brief explanation of the food culture for "${menuName}":
@@ -215,7 +221,7 @@ export async function determineCategoriesForAllMenus(menus: MenuItem[]): Promise
       throw new Error("Gemini API key not configured")
     }
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: MODEL })
 
     // メニューリストを作成
     const menuList = menus
@@ -313,7 +319,7 @@ async function determineCategoryFromMenuName(name: string, nameJp: string): Prom
       throw new Error("Gemini API key not configured")
     }
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: MODEL })
 
     const prompt = `
 以下のメニュー名を分析して、最も適切なカテゴリーIDを選んでください：
@@ -381,7 +387,7 @@ async function generateImage(prompt: string): Promise<GeneratedImage | null> {
   const MAX_RETRIES = 5
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const res = await imageModelAI.models.generateContent({
+      const res = await ai.models.generateContent({
         model: IMAGE_MODEL,
         contents: prompt,
         config: { responseModalities: [Modality.TEXT, Modality.IMAGE] },
@@ -417,4 +423,151 @@ async function generateImage(prompt: string): Promise<GeneratedImage | null> {
     }
   }
   return null
+}
+
+// メニューの原材料を生成する関数
+export async function generateIngredients(menuName: string): Promise<string[]> {
+  const prompt = `
+${menuName}の一般的な原材料をリスト形式で教えて下さい。
+以下の条件に必ず従ってください。
+
+## 条件
+- 一般的な原材料をリストアップしてください
+- 各原材料は、「,」で区切ってください
+- 各原材料は、**注釈や括弧書きを含めず、食材の名称のみ**を記載してください
+- **部位名などの詳細は除き、素材カテゴリとして一般的な名称で記載してください（例：豚バラ肉 → 豚肉）**
+- リストには、**主な原材料のみ**を含めてください
+- 材料以外には何も記載しないでください
+`
+  const result = await getTextResponse(prompt)
+  if (!result) {
+    throw new Error("Failed to generate ingredients")
+  }
+  return result
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+}
+
+// 原材料にアレルゲンが含まれているかをチェックする関数
+export async function checkAllergen(
+  ingredients: string[],
+  allergenIds: number[]
+): Promise<number[]> {
+  const ingredientListStr = ingredients.join(", ")
+  const allergenList = allergenIds
+    .map((id) => allergyIdMap[id])
+    .filter((name): name is string => !!name)
+  const allergensListStr = allergenList.join(", ")
+
+  const prompt = `
+  「原材料リスト」に「チェック対象原材料」が含まれているかをチェックしてください。
+  「原材料リスト」と「チェック対象原材料」は以下のとおりです。
+
+  ## 原材料リスト
+  ${ingredientListStr}
+
+  ## チェック対象原材料
+  ${allergensListStr}
+
+  ---
+
+  以下の条件に必ず従ってください。
+
+  ## 条件
+  - 「原材料リスト」に「チェック対象原材料」が含まれている場合は、「チェック対象原材料」の文字列をそのまま「,」区切りで返してください。
+  - 含まれていない場合は、「null」を返してください。
+  `
+
+  const result = await getTextResponse(prompt)
+  // チェック対象原材料が含まれていない場合は空文字列を返す
+  if (result === "null") {
+    return []
+  }
+  if (!result) {
+    throw new Error("Failed to check allergens")
+  }
+
+  const matchedAllergenNameList = result
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+
+  return matchedAllergenNameList
+    .map((name) => allergyNameToIdMap[name])
+    .filter((id): id is number => typeof id === "number")
+}
+
+// 原材料に宗教的に食べれないものがあるかチェックする関数
+export async function checkReligiousRestriction(
+  ingredients: string[],
+  religiousRestrictionIds: number[]
+): Promise<number[]> {
+  const ingredientListStr = ingredients.join(", ")
+  const religiousRestrictionList = religiousRestrictionIds
+    .map((id) => religiousRestrictionIdMap[id])
+    .filter((name): name is string => !!name)
+  const religiousRestrictionListStr = religiousRestrictionList.join(", ")
+
+  const prompt = `
+「宗教的・信条的な食事制限」のある人が食べられない原材料が「原材料リスト」にあるかチェックしてください。
+  「原材料リスト」と「宗教的・信条的な食事制限」は以下のとおりです。
+
+  ## 原材料リスト
+  ${ingredientListStr}
+
+  ## チェック対象原材料
+  ${religiousRestrictionListStr}
+
+  ---
+
+  以下の条件に必ず従ってください。
+
+  ## 条件
+  -「宗教的・信条的な食事制限」のある人が食べられない原材料が「原材料リスト」に含まれている場合は、「宗教的・信条的な食事制限」の文字列をそのまま「,」区切りで返してください。
+  - 含まれていない場合は、「null」を返してください。
+  `
+
+  const result = await getTextResponse(prompt)
+  console.log("religious restriction:", result)
+
+  if (result === "null") {
+    return []
+  }
+  if (!result) {
+    throw new Error("Failed to check religious restrictions")
+  }
+
+  const matchedReligiousRestrictionNameList = result
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+
+  return matchedReligiousRestrictionNameList
+    .map((name) => religiousRestrictionNameToIdMap[name])
+    .filter((id): id is number => typeof id === "number")
+}
+
+// テキストでGemini APIから回答を取得する関数
+async function getTextResponse(prompt: string): Promise<string> {
+  const MAX_RETRIES = 3
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+      })
+      if (!response || !response.text) {
+        throw new Error("No text response returned from Gemini API")
+      }
+      return response.text
+    } catch (error) {
+      console.warn("Gemini API error", error)
+      // エラーが発生した場合はリトライ
+      if (attempt < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
+      }
+    }
+  }
+  throw new Error("Failed to get response from Gemini API after multiple attempts")
 }
