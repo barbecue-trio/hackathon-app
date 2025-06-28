@@ -5,8 +5,7 @@ import Button from "../components/Button"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 import { uploadImageToStorage } from "../services/imageUpload"
-// TODO: 将来のカメラ撮影機能実装時に使用予定
-// import { uploadCameraImageToStorage } from "../services/imageUpload"
+import { processMenuImage } from "../services/menuProcessingService"
 
 function MenuScanner() {
   const navigate = useNavigate()
@@ -14,73 +13,6 @@ function MenuScanner() {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<string>("")
   const [uploadProgress, setUploadProgress] = useState<number>(0)
-
-  const handleCameraScan = async () => {
-    console.log("Scan with Camera clicked")
-    setIsUploading(true)
-    setUploadStatus("カメラにアクセス中...")
-    setUploadProgress(0)
-
-    try {
-      // カメラアクセスを要求
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment", // 背面カメラを優先
-        },
-      })
-
-      // カメラストリームが取得できた場合
-      if (stream) {
-        console.log("Camera access granted")
-        setUploadStatus("写真を撮影中...")
-        setUploadProgress(30)
-
-        // TODO: 実際のカメラプレビューと撮影機能を実装
-        // 現在は仮でcanvasを使って画像をキャプチャする処理を想定
-
-        // 仮の画像キャプチャ処理（後で実装）
-        // const canvas = document.createElement('canvas')
-        // const video = document.createElement('video')
-        // video.srcObject = stream
-        // ... canvas処理 ...
-        // const blob = await canvasToBlob(canvas)
-
-        // 現在は一旦ストリームを停止
-        for (const track of stream.getTracks()) {
-          track.stop()
-        }
-
-        // 仮の処理として直接遷移（実際の撮影・アップロード処理は後で実装）
-        setUploadProgress(100)
-        setUploadStatus("処理完了")
-        setTimeout(() => {
-          setIsUploading(false)
-          setUploadStatus("")
-          setUploadProgress(0)
-          navigate("/menu")
-        }, 1000)
-      }
-    } catch (error) {
-      console.error("Camera access denied or not available:", error)
-      setIsUploading(false)
-      setUploadStatus("")
-      setUploadProgress(0)
-
-      if (error instanceof Error) {
-        if (error.name === "NotAllowedError") {
-          alert(
-            "カメラへのアクセスが拒否されました。ブラウザの設定でカメラの使用を許可してください。"
-          )
-        } else if (error.name === "NotFoundError") {
-          alert("カメラが見つかりません。デバイスにカメラが接続されているか確認してください。")
-        } else {
-          alert("カメラアクセスエラーが発生しました。しばらく後でもう一度お試しください。")
-        }
-      } else {
-        alert("カメラへのアクセスが拒否されました。ブラウザの設定を確認してください。")
-      }
-    }
-  }
 
   const handleUploadImage = () => {
     console.log("Upload Image clicked")
@@ -120,20 +52,56 @@ function MenuScanner() {
       console.log("ファイルサイズ:", (result.fileSize / 1024 / 1024).toFixed(2), "MB")
       console.log("Content Type:", result.contentType)
 
-      // アップロード成功後、Menu Analysisページに遷移
-      setTimeout(() => {
-        setIsUploading(false)
-        setUploadStatus("")
-        setUploadProgress(0)
-        navigate("/menu", {
-          state: {
-            uploadedImage: result.downloadURL,
-            imagePath: result.filePath,
-            fileSize: result.fileSize,
-            contentType: result.contentType,
-          },
-        })
-      }, 1000)
+      // メニュー画像処理APIを呼び出し
+      setUploadStatus("メニューを解析中...")
+      setUploadProgress(100)
+
+      try {
+        const processResult = await processMenuImage(result.filePath)
+        console.log("メニュー処理結果:", processResult)
+
+        // documentIdをローカルストレージに保存
+        if (processResult.success && processResult.documentId) {
+          localStorage.setItem("menuCollectionId", processResult.documentId)
+          console.log("menuCollectionId saved:", processResult.documentId)
+        }
+
+        // Menu Analysisページに遷移
+        setTimeout(() => {
+          setIsUploading(false)
+          setUploadStatus("")
+          setUploadProgress(0)
+          navigate("/menu", {
+            state: {
+              uploadedImage: result.downloadURL,
+              imagePath: result.filePath,
+              fileSize: result.fileSize,
+              contentType: result.contentType,
+              menuCollectionId: processResult.documentId,
+              menuCount: processResult.menuCount,
+            },
+          })
+        }, 1000)
+      } catch (apiError) {
+        console.error("Menu processing API error:", apiError)
+        // API エラーの場合でもページ遷移は継続（フォールバック）
+        setTimeout(() => {
+          setIsUploading(false)
+          setUploadStatus("")
+          setUploadProgress(0)
+          navigate("/menu", {
+            state: {
+              uploadedImage: result.downloadURL,
+              imagePath: result.filePath,
+              fileSize: result.fileSize,
+              contentType: result.contentType,
+            },
+          })
+        }, 1000)
+
+        // エラーメッセージを表示
+        alert("メニューの解析に失敗しました。手動でメニューを確認してください。")
+      }
     } catch (error) {
       console.error("Upload error:", error)
       setIsUploading(false)
@@ -253,33 +221,6 @@ function MenuScanner() {
               alignItems: "center",
             }}
           >
-            {/* Primary Button - Scan with Camera */}
-            <Button
-              variant="primary"
-              disabled={isUploading}
-              sx={{
-                backgroundColor: isUploading ? "#ccc" : "#4263FA",
-                color: "#FFFFFF",
-                width: "100%",
-                maxWidth: "358px",
-                height: "48px",
-                borderRadius: "24px",
-                "&:hover": {
-                  backgroundColor: isUploading ? "#ccc" : "#3651E6",
-                },
-                "&:active": {
-                  backgroundColor: isUploading ? "#ccc" : "#2A41D0",
-                },
-                "&:disabled": {
-                  backgroundColor: "#ccc",
-                  color: "#999",
-                },
-              }}
-              onClick={handleCameraScan}
-            >
-              Scan with Camera
-            </Button>
-
             {/* Secondary Button - Upload Image */}
             <Button
               variant="secondary"
