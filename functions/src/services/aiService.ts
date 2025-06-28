@@ -1,7 +1,11 @@
+import { GoogleGenAI, Modality } from "@google/genai"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { geminiApiKey } from "../config"
-import type { MenuItem } from "../types"
+import type { GeneratedImage, MenuItem } from "../types"
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
+
+const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"
+const imageModelAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" })
 
 export async function extractMenuWithGoogleAI(
   gcsUri: string
@@ -351,4 +355,66 @@ async function determineCategoryFromMenuName(name: string, nameJp: string): Prom
     // エラーの場合はデフォルトで5（その他）を返す
     return 5
   }
+}
+
+// メニュー名から画像を生成する関数
+export async function generateMenuImage(menuName: string): Promise<GeneratedImage | null> {
+  const prompt = `
+料理名：${menuName}の画像を生成してください。
+生成する際には以下の条件に従ってください。
+
+## 条件
+- 画像のスタイル: 写実的で食品サンプルやディスプレイ用の料理写真
+- 画像のテーマ: ${menuName}の料理が主役となるように、他の要素は一切含めない
+- 画像の背景: シンプルで料理が引き立つように、背景は白または淡い色にしてください
+- 画像の構図: 料理が中央に配置され、全体がよく見えるように、クローズアップで、余計なものが写り込まないようにしてください
+- **文字、ロゴ、ブランド名、日付、透かし、その他のテキストは一切含めないでください。**
+- **人間、手、食器の一部（料理を盛る皿以外）、その他の物体は含めないでください。**
+- [ID: ${Date.now()}]
+`
+
+  return await generateImage(prompt)
+}
+
+// 画像生成のためのGemini APIを使用する関数
+async function generateImage(prompt: string): Promise<GeneratedImage | null> {
+  const MAX_RETRIES = 5
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const res = await imageModelAI.models.generateContent({
+        model: IMAGE_MODEL,
+        contents: prompt,
+        config: { responseModalities: [Modality.TEXT, Modality.IMAGE] },
+      })
+      if (
+        !res ||
+        !res.candidates ||
+        res.candidates.length === 0 ||
+        !res.candidates[0].content ||
+        !res.candidates[0].content.parts
+      ) {
+        throw new Error("No candidates returned from Gemini API")
+      }
+      for (const part of res.candidates[0].content.parts) {
+        if (part.inlineData) {
+          const imageData = part.inlineData.data
+          if (!imageData) {
+            throw new Error("No image data found in the inline data")
+          }
+          const mimeType = part.inlineData.mimeType
+          if (!mimeType) {
+            throw new Error("No mimeType found in the inline data")
+          }
+          return { base64: imageData, mimeType: mimeType }
+        }
+      }
+      throw new Error("No image data found in any part")
+    } catch (err) {
+      console.warn("Gemini API error", err)
+      if (attempt < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
+      }
+    }
+  }
+  return null
 }
