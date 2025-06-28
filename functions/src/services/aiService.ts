@@ -1,5 +1,4 @@
 import { GoogleGenAI, Modality } from "@google/genai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { geminiApiKey } from "../config";
 import {
   MENU_EXTRACTION_PROMPT,
@@ -11,8 +10,14 @@ import type { GeneratedImage, MenuItem } from "../types";
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService";
 
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation";
+const TEXT_MODEL = "gemini-2.5-flash";
+
 const imageModelAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
+});
+
+const textModelAI = new GoogleGenAI({
+  apiKey: geminiApiKey || "",
 });
 
 export async function extractMenuWithGoogleAI(
@@ -23,23 +28,27 @@ export async function extractMenuWithGoogleAI(
     if (!apiKey) {
       throw new Error("Gemini API key not configured");
     }
-    const genAI = new GoogleGenerativeAI(apiKey);
 
     const imageData = await fetchImageAsBase64(gcsUri);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    const result = await model.generateContent([
-      MENU_EXTRACTION_PROMPT,
-      {
-        inlineData: {
-          mimeType: "image/jpeg",
-          data: imageData,
+    const result = await textModelAI.models.generateContent({
+      model: TEXT_MODEL,
+      contents: [
+        MENU_EXTRACTION_PROMPT,
+        {
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: imageData,
+          },
         },
-      },
-    ]);
+      ],
+    });
 
-    const text = result.response.text();
+    if (!result?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error("No response from AI model");
+    }
+
+    const text = result.candidates[0].content.parts[0].text;
     console.log("Google AIの応答:", text);
 
     const jsonMatch =
@@ -132,13 +141,19 @@ export async function generateFoodCultureWithAI(
       if (!apiKey) {
         throw new Error("Gemini API key not configured");
       }
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const prompt = createFoodCulturePrompt(menuName);
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      const result = await textModelAI.models.generateContent({
+        model: TEXT_MODEL,
+        contents: prompt,
+      });
+
+      if (!result?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error("No response from AI model");
+      }
+
+      const text = result.candidates[0].content.parts[0].text;
 
       const cleanedText = text.trim().replace(/\n+/g, " ").replace(/\s+/g, " ");
 
@@ -173,8 +188,6 @@ export async function determineCategoriesForAllMenus(
     if (!apiKey) {
       throw new Error("Gemini API key not configured");
     }
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // メニューリストを作成
     const menuList = menus
@@ -183,8 +196,16 @@ export async function determineCategoriesForAllMenus(
 
     const prompt = createCategoryBatchPrompt(menuList);
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
+    const result = await textModelAI.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+    });
+
+    if (!result?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error("No response from AI model");
+    }
+
+    const text = result.candidates[0].content.parts[0].text.trim();
 
     console.log("AIの回答:", text);
 
@@ -256,13 +277,19 @@ async function determineCategoryFromMenuName(
     if (!apiKey) {
       throw new Error("Gemini API key not configured");
     }
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = createCategoryIndividualPrompt(name, nameJp);
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
+    const result = await textModelAI.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
+    });
+
+    if (!result?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error("No response from AI model");
+    }
+
+    const text = result.candidates[0].content.parts[0].text.trim();
 
     const numberMatch = text.match(/\d+/);
     if (numberMatch) {
