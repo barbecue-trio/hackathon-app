@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["dist", "node_modules", "tsconfig*.json", "functions/lib/**"]
+    "ignore": ["lib/**", "node_modules/**", "tsconfig*.json", "**/*.js.map"]
   },
   "formatter": {
     "enabled": true,
@@ -22,10 +22,6 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "correctness": {
-        "useExhaustiveDependencies": "warn",
-        "useHookAtTopLevel": "error"
-      },
       "suspicious": {
         "noExplicitAny": "warn"
       },
