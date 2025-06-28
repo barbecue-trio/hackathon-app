@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - feature/firebase-functions-config-update
     paths:
       - "functions/**"
       - ".github/workflows/deploy-functions.yml"
