@@ -15,7 +15,7 @@ export async function extractMenuWithGoogleAI(
 
     const imageData = await fetchImageAsBase64(gcsUri)
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 
     const prompt = `
 この画像は居酒屋のメニューです。以下の条件でメニュー名を抽出してください：
