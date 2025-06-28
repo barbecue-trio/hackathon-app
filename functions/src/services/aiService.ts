@@ -1,21 +1,21 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
-import { geminiApiKey } from "../config"
-import type { MenuItem } from "../types"
-import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { geminiApiKey } from "../config";
+import type { MenuItem } from "../types";
+import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService";
 
 export async function extractMenuWithGoogleAI(
   gcsUri: string
 ): Promise<{ name: string; name_jp: string }[]> {
   try {
-    const apiKey = geminiApiKey.value()
+    const apiKey = geminiApiKey;
     if (!apiKey) {
-      throw new Error("Gemini API key not configured")
+      throw new Error("Gemini API key not configured");
     }
-    const genAI = new GoogleGenerativeAI(apiKey)
+    const genAI = new GoogleGenerativeAI(apiKey);
 
-    const imageData = await fetchImageAsBase64(gcsUri)
+    const imageData = await fetchImageAsBase64(gcsUri);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
 この画像は居酒屋のメニューです。以下の条件でメニュー名を抽出してください：
@@ -76,7 +76,7 @@ export async function extractMenuWithGoogleAI(
 - チャーハン → {"name": "Fried Rice", "name_jp": "チャーハン"}
 
 必ずJSON形式で返してください。説明文は不要です。
-`
+`;
 
     const result = await model.generateContent([
       prompt,
@@ -86,90 +86,103 @@ export async function extractMenuWithGoogleAI(
           data: imageData,
         },
       },
-    ])
+    ]);
 
-    const text = result.response.text()
-    console.log("Google AIの応答:", text)
+    const text = result.response.text();
+    console.log("Google AIの応答:", text);
 
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/)
-    const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text
+    const jsonMatch =
+      text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/);
+    const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
 
-    console.log("抽出されたJSON文字列:", jsonString)
+    console.log("抽出されたJSON文字列:", jsonString);
 
     try {
-      const menuData = JSON.parse(jsonString)
-      console.log("パースされたメニューデータ:", menuData)
+      const menuData = JSON.parse(jsonString);
+      console.log("パースされたメニューデータ:", menuData);
 
       if (Array.isArray(menuData)) {
         const processedData = menuData
           .map((item) => {
             if (typeof item === "string") {
               // 文字列の場合は、英語名を生成する
-              console.log(`文字列アイテム: ${item}`)
-              return { name: item, name_jp: item }
+              console.log(`文字列アイテム: ${item}`);
+              return { name: item, name_jp: item };
             }
-            if (item && typeof item === "object" && "name" in item && "name_jp" in item) {
-              console.log(`オブジェクトアイテム: ${JSON.stringify(item)}`)
-              return { name: item.name, name_jp: item.name_jp }
+            if (
+              item &&
+              typeof item === "object" &&
+              "name" in item &&
+              "name_jp" in item
+            ) {
+              console.log(`オブジェクトアイテム: ${JSON.stringify(item)}`);
+              return { name: item.name, name_jp: item.name_jp };
             }
-            console.log(`無効なアイテム: ${JSON.stringify(item)}`)
-            return { name: "", name_jp: "" }
+            console.log(`無効なアイテム: ${JSON.stringify(item)}`);
+            return { name: "", name_jp: "" };
           })
-          .filter((item) => item.name && item.name_jp)
+          .filter((item) => item.name && item.name_jp);
 
-        console.log("処理後のメニューデータ:", processedData)
+        console.log("処理後のメニューデータ:", processedData);
 
         // 文字列配列が返された場合は、日本語名をそのまま英語名として使用
-        if (processedData.length > 0 && processedData[0].name === processedData[0].name_jp) {
-          console.log("文字列配列が検出されました。日本語名をそのまま使用します...")
+        if (
+          processedData.length > 0 &&
+          processedData[0].name === processedData[0].name_jp
+        ) {
+          console.log(
+            "文字列配列が検出されました。日本語名をそのまま使用します..."
+          );
           return processedData.map((item) => ({
             name: item.name_jp, // 日本語名をそのまま英語名として使用
             name_jp: item.name_jp,
-          }))
+          }));
         }
 
-        return processedData
+        return processedData;
       }
-      return []
+      return [];
     } catch (parseError) {
-      console.error("JSON解析エラー:", parseError)
-      console.log("フォールバック: テキストからメニュー名を抽出")
-      const menuNames = extractMenuNamesFromText(text)
+      console.error("JSON解析エラー:", parseError);
+      console.log("フォールバック: テキストからメニュー名を抽出");
+      const menuNames = extractMenuNamesFromText(text);
       const fallbackData = menuNames.map((item) => ({
         name: item.name_jp,
         name_jp: item.name_jp,
-      }))
-      console.log("フォールバックデータ:", fallbackData)
+      }));
+      console.log("フォールバックデータ:", fallbackData);
 
       // フォールバックでも英語名を生成する
       if (fallbackData.length > 0) {
-        console.log("フォールバックデータをそのまま使用します...")
+        console.log("フォールバックデータをそのまま使用します...");
         return fallbackData.map((item) => ({
           name: item.name_jp, // 日本語名をそのまま英語名として使用
           name_jp: item.name_jp,
-        }))
+        }));
       }
 
-      return fallbackData
+      return fallbackData;
     }
   } catch (error) {
-    console.error("Google AIでの抽出エラー:", error)
-    throw error
+    console.error("Google AIでの抽出エラー:", error);
+    throw error;
   }
 }
 
-export async function generateFoodCultureWithAI(menuName: string): Promise<string> {
-  const maxRetries = 3
-  const retryDelay = 1000 // 1秒
+export async function generateFoodCultureWithAI(
+  menuName: string
+): Promise<string> {
+  const maxRetries = 3;
+  const retryDelay = 1000; // 1秒
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const apiKey = geminiApiKey.value()
+      const apiKey = geminiApiKey;
       if (!apiKey) {
-        throw new Error("Gemini API key not configured")
+        throw new Error("Gemini API key not configured");
       }
-      const genAI = new GoogleGenerativeAI(apiKey)
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const prompt = `
 Please provide a brief explanation of the food culture for "${menuName}":
@@ -179,44 +192,51 @@ Please provide a brief explanation of the food culture for "${menuName}":
 - Its current status and significance
 
 Please answer in English, 50-100 characters, concise and informative.
-`
+`;
 
-      const result = await model.generateContent(prompt)
-      const text = result.response.text()
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
 
-      const cleanedText = text.trim().replace(/\n+/g, " ").replace(/\s+/g, " ")
+      const cleanedText = text.trim().replace(/\n+/g, " ").replace(/\s+/g, " ");
 
-      return cleanedText
+      return cleanedText;
     } catch (error) {
-      console.error(`"${menuName}"の食文化生成でエラー (試行 ${attempt}/${maxRetries}):`, error)
+      console.error(
+        `"${menuName}"の食文化生成でエラー (試行 ${attempt}/${maxRetries}):`,
+        error
+      );
 
       if (attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, retryDelay))
-        continue
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        continue;
       }
 
-      console.error(`"${menuName}"の食文化生成が${maxRetries}回試行しても失敗しました`)
-      return "Failed to generate food culture information."
+      console.error(
+        `"${menuName}"の食文化生成が${maxRetries}回試行しても失敗しました`
+      );
+      return "Failed to generate food culture information.";
     }
   }
 
-  return "Failed to generate food culture information."
+  return "Failed to generate food culture information.";
 }
 
 // 全メニューのカテゴリーを一括で判定する関数
-export async function determineCategoriesForAllMenus(menus: MenuItem[]): Promise<number[]> {
+export async function determineCategoriesForAllMenus(
+  menus: MenuItem[]
+): Promise<number[]> {
   try {
-    const apiKey = geminiApiKey.value()
+    const apiKey = geminiApiKey;
     if (!apiKey) {
-      throw new Error("Gemini API key not configured")
+      throw new Error("Gemini API key not configured");
     }
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // メニューリストを作成
     const menuList = menus
       .map((menu, index) => `${index + 1}. ${menu.name} (${menu.name_jp})`)
-      .join("\n")
+      .join("\n");
 
     const prompt = `
 以下のメニューリストの各メニューに対して、最も適切なカテゴリーIDを選んでください：
@@ -243,73 +263,83 @@ ${menuList}
 - 焼き鳥 → 5
 
 説明は不要で、数字の配列のみで回答してください。
-`
+`;
 
-    const result = await model.generateContent(prompt)
-    const text = result.response.text().trim()
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
 
-    console.log("AIの回答:", text)
+    console.log("AIの回答:", text);
 
     // JSON配列を抽出
-    const jsonMatch = text.match(/\[[\s\S]*\]/)
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       try {
-        const categoryIds = JSON.parse(jsonMatch[0])
+        const categoryIds = JSON.parse(jsonMatch[0]);
         if (Array.isArray(categoryIds) && categoryIds.length === menus.length) {
           // 各IDが1-5の範囲内かチェック
           const validIds = categoryIds.map((id) => {
-            const numId = Number.parseInt(id)
-            return numId >= 1 && numId <= 5 ? numId : 5
-          })
-          return validIds
+            const numId = Number.parseInt(id);
+            return numId >= 1 && numId <= 5 ? numId : 5;
+          });
+          return validIds;
         }
       } catch (parseError) {
-        console.error("JSON解析エラー:", parseError)
+        console.error("JSON解析エラー:", parseError);
       }
     }
 
     // AIの回答が不正な場合は、個別に判定
-    console.warn(`AIの一括回答が不正でした: "${text}"。個別判定にフォールバックします。`)
-    return await determineCategoriesIndividually(menus)
+    console.warn(
+      `AIの一括回答が不正でした: "${text}"。個別判定にフォールバックします。`
+    );
+    return await determineCategoriesIndividually(menus);
   } catch (error) {
-    console.error("一括カテゴリー判定でエラーが発生しました:", error)
+    console.error("一括カテゴリー判定でエラーが発生しました:", error);
     // エラーの場合は個別判定にフォールバック
-    return await determineCategoriesIndividually(menus)
+    return await determineCategoriesIndividually(menus);
   }
 }
 
 // 個別判定のフォールバック関数
-async function determineCategoriesIndividually(menus: MenuItem[]): Promise<number[]> {
-  console.log("個別判定でカテゴリーを判定中...")
-  const results: number[] = []
+async function determineCategoriesIndividually(
+  menus: MenuItem[]
+): Promise<number[]> {
+  console.log("個別判定でカテゴリーを判定中...");
+  const results: number[] = [];
 
   for (let i = 0; i < menus.length; i++) {
     try {
-      const categoryId = await determineCategoryFromMenuName(menus[i].name, menus[i].name_jp)
-      results.push(categoryId)
+      const categoryId = await determineCategoryFromMenuName(
+        menus[i].name,
+        menus[i].name_jp
+      );
+      results.push(categoryId);
     } catch (error) {
-      console.error(`個別判定でエラー: ${menus[i].name}`, error)
-      results.push(5) // デフォルト値
+      console.error(`個別判定でエラー: ${menus[i].name}`, error);
+      results.push(5); // デフォルト値
     }
 
     // リクエスト間に少し待機時間を設ける
     if (i < menus.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }
 
-  return results
+  return results;
 }
 
 // メニュー名からカテゴリーIDを判定する関数
-async function determineCategoryFromMenuName(name: string, nameJp: string): Promise<number> {
+async function determineCategoryFromMenuName(
+  name: string,
+  nameJp: string
+): Promise<number> {
   try {
-    const apiKey = geminiApiKey.value()
+    const apiKey = geminiApiKey;
     if (!apiKey) {
-      throw new Error("Gemini API key not configured")
+      throw new Error("Gemini API key not configured");
     }
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
 以下のメニュー名を分析して、最も適切なカテゴリーIDを選んでください：
@@ -331,24 +361,26 @@ async function determineCategoryFromMenuName(name: string, nameJp: string): Prom
 - 刺身盛り合わせ → 3
 - 握り寿司 → 4
 - 焼き鳥 → 5
-`
+`;
 
-    const result = await model.generateContent(prompt)
-    const text = result.response.text().trim()
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
 
-    const numberMatch = text.match(/\d+/)
+    const numberMatch = text.match(/\d+/);
     if (numberMatch) {
-      const categoryId = Number.parseInt(numberMatch[0])
+      const categoryId = Number.parseInt(numberMatch[0]);
       if (categoryId >= 1 && categoryId <= 5) {
-        return categoryId
+        return categoryId;
       }
     }
 
-    console.warn(`AIの回答が不正でした: "${text}"。デフォルト値5を使用します。`)
-    return 5
+    console.warn(
+      `AIの回答が不正でした: "${text}"。デフォルト値5を使用します。`
+    );
+    return 5;
   } catch (error) {
-    console.error(`カテゴリー判定でエラーが発生しました: ${name}`, error)
+    console.error(`カテゴリー判定でエラーが発生しました: ${name}`, error);
     // エラーの場合はデフォルトで5（その他）を返す
-    return 5
+    return 5;
   }
 }
