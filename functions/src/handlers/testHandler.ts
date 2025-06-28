@@ -1,8 +1,8 @@
 import type { Request } from "firebase-functions/v2/https"
 import { bucket } from "../config"
-import type { ProcessImageResponse, MenuCollection } from "../types"
 import { extractMenuWithGoogleAI } from "../services/aiService"
 import { saveMenuData } from "../services/firestoreService"
+import type { MenuCollection, ProcessImageResponse } from "../types"
 import { generateCategoriesForDocument } from "./categoryHandler"
 import { generateFoodCultureForDocument } from "./foodCultureHandler"
 

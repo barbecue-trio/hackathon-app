@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { geminiApiKey } from "../config"
 import type { MenuItem } from "../types"
-import { fetchImageAsBase64, extractMenuNamesFromText } from "./imageService"
+import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
 
 export async function extractMenuWithGoogleAI(
   gcsUri: string
