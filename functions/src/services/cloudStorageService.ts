@@ -1,11 +1,14 @@
 import { getStorage } from "firebase-admin/storage"
 import { extMap } from "../constant"
-import { GeneratedImage } from "../types"
+import type { GeneratedImage } from "../types"
 
 const BUCKET_NAME = "barbecue-trio.firebasestorage.app"
 
 // メニュー画像をアップロードする関数
-export async function uploadMenuImage(imageName: string, imageData: GeneratedImage): Promise<string> {
+export async function uploadMenuImage(
+  imageName: string,
+  imageData: GeneratedImage
+): Promise<string> {
   const timestamp = Date.now().toString()
   const ext = extMap[imageData.mimeType] || "bin"
   const fileName = `${timestamp}-${imageName}.${ext}`

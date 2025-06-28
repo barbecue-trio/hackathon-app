@@ -1,8 +1,8 @@
+import { GoogleGenAI, Modality } from "@google/genai"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { geminiApiKey } from "../config"
 import type { GeneratedImage, MenuItem } from "../types"
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
-import { GoogleGenAI, Modality } from "@google/genai"
 
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"
 const imageModelAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" })
