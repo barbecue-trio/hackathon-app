@@ -46,13 +46,9 @@ export const getMenuImage = onRequest({ timeoutSeconds: 300 }, async (req, res) 
       return
     }
     const menus = docData.menus as MenuItem[]
-    const updatedMenus: MenuItem[] = []
-    for (const menu of menus) {
-      const imageData = await generateMenuImage(menu.name)
-      // 画像生成に失敗した場合はファイル名は空文字列を返す
-      const fileName = imageData ? await uploadMenuImage(menu.name, imageData) : ""
-      updatedMenus.push({ ...menu, image_id: fileName })
-    }
+    const updatedMenus: MenuItem[] = await Promise.all(
+      menus.map((menu) => generateImageAndUpload(menu))
+    )
     await docRef.update({ menus: updatedMenus })
 
     res.sendStatus(200)
@@ -61,6 +57,19 @@ export const getMenuImage = onRequest({ timeoutSeconds: 300 }, async (req, res) 
     res.status(500).json({ error: "Internal Server Error" })
   }
 })
+
+/**
+ * メニューの画像を生成し、Cloud Storageにアップロードします。
+ *
+ * @param menu メニューアイテム
+ * @returns 画像IDを含むメニューアイテム
+ */
+async function generateImageAndUpload(menu: MenuItem): Promise<MenuItem> {
+  const imageData = await generateMenuImage(menu.name)
+  // 画像生成に失敗した場合はファイル名は空文字列を返す
+  const fileName = imageData ? await uploadMenuImage(menu.name, imageData) : ""
+  return { ...menu, image_id: fileName }
+}
 
 /**
  * メニュー名を元にGemini APIを使って画像を生成します。
