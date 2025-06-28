@@ -7,7 +7,7 @@ export async function extractMenuWithGoogleAI(
   gcsUri: string
 ): Promise<{ name: string; name_jp: string }[]> {
   try {
-    const apiKey = geminiApiKey.value()
+    const apiKey = geminiApiKey
     if (!apiKey) {
       throw new Error("Gemini API key not configured")
     }
@@ -164,7 +164,7 @@ export async function generateFoodCultureWithAI(menuName: string): Promise<strin
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const apiKey = geminiApiKey.value()
+      const apiKey = geminiApiKey
       if (!apiKey) {
         throw new Error("Gemini API key not configured")
       }
@@ -206,7 +206,7 @@ Please answer in English, 50-100 characters, concise and informative.
 // 全メニューのカテゴリーを一括で判定する関数
 export async function determineCategoriesForAllMenus(menus: MenuItem[]): Promise<number[]> {
   try {
-    const apiKey = geminiApiKey.value()
+    const apiKey = geminiApiKey
     if (!apiKey) {
       throw new Error("Gemini API key not configured")
     }
@@ -304,7 +304,7 @@ async function determineCategoriesIndividually(menus: MenuItem[]): Promise<numbe
 // メニュー名からカテゴリーIDを判定する関数
 async function determineCategoryFromMenuName(name: string, nameJp: string): Promise<number> {
   try {
-    const apiKey = geminiApiKey.value()
+    const apiKey = geminiApiKey
     if (!apiKey) {
       throw new Error("Gemini API key not configured")
     }

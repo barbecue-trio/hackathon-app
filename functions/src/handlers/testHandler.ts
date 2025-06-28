@@ -23,7 +23,7 @@ export async function handleTestProcessMenuImage(request: Request, response: any
     const fullStorageId = testStorageId.startsWith("menuImages/")
       ? testStorageId
       : `menuImages/${testStorageId}`
-    const gcsUri = `gs://${bucket.value()}/${fullStorageId}`
+    const gcsUri = `gs://${bucket}/${fullStorageId}`
 
     // Google AIでメニュー情報を抽出
     const menuNames = await extractMenuWithGoogleAI(gcsUri)

@@ -31,7 +31,7 @@ export async function handleProcessMenuImage(request: Request, response: any): P
     const fullStorageId = storageId.startsWith("menuImages/")
       ? storageId
       : `menuImages/${storageId}`
-    const gcsUri = `gs://${bucket.value()}/${fullStorageId}`
+    const gcsUri = `gs://${bucket}/${fullStorageId}`
 
     const menuNames = await extractMenuWithGoogleAI(gcsUri)
 
