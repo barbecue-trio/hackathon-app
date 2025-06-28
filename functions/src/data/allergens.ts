@@ -49,3 +49,5 @@ export const allergyNameToIdMap: Record<string, number> = Object.entries(allergy
 )
 
 export const allergyList: Allergy[] = Object.values(ALLERGENS)
+
+export const allergenNameList = Object.values(ALLERGENS).map((allergen) => allergen.name)

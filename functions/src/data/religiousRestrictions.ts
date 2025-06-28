@@ -34,3 +34,7 @@ export const religiousRestrictionNameToIdMap: Record<string, number> = Object.en
 
 export const religiousRestrictionList: ReligiousRestriction[] =
   Object.values(RELIGIOUS_RESTRICTIONS)
+
+export const religiousRestrictionNameList = Object.values(RELIGIOUS_RESTRICTIONS).map(
+  (restriction) => restriction.name
+)
