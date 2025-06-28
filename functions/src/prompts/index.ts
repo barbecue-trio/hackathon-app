@@ -2,10 +2,10 @@
 
 /**
  * メニュー抽出用プロンプト
- * 居酒屋メニューの画像からメニュー名を英日両言語で抽出
+ * 飲食店メニューの画像からメニュー名を英日両言語で抽出
  */
 export const MENU_EXTRACTION_PROMPT = `
-この画像は居酒屋のメニューです。以下の条件でメニュー名を抽出してください：
+この画像は飲食店のメニューです。以下の条件でメニュー名を抽出してください：
 条件：
 1. メニュー名のみを抽出（価格は除外）
 2. カテゴリ名（「とりあえず」「おすすめメニュー」「揚げもの」「刺身」「焼きもの」など）は除外
@@ -21,46 +21,14 @@ export const MENU_EXTRACTION_PROMPT = `
 必ず以下の形式でJSON配列で返してください：
 [
   {
-    "name": "英語でのメニュー名",
-    "name_jp": "日本語でのメニュー名"
+    "name": "英語名",
+    "name_jp": "日本語名"
   }
 ]
 
 英語名は一般的な英語表記を使用し、日本語名は元のメニュー表記をそのまま使用してください。
 例：
 - 焼き鳥 → {"name": "Yakitori", "name_jp": "焼き鳥"}
-- 刺身盛り合わせ → {"name": "Sashimi Platter", "name_jp": "刺身盛り合わせ"}
-- 梅おにぎり → {"name": "Umeboshi Onigiri", "name_jp": "梅おにぎり"}
-- 冷奴 → {"name": "Hiyayakko", "name_jp": "冷奴"}
-- 枝豆 → {"name": "Edamame", "name_jp": "枝豆"}
-- 厚焼き玉子 → {"name": "Tamagoyaki", "name_jp": "厚焼き玉子"}
-- きゅうり一本漬け → {"name": "Cucumber Pickles", "name_jp": "きゅうり一本漬け"}
-- キムチ → {"name": "Kimchi", "name_jp": "キムチ"}
-- チャンジャ → {"name": "Jangjorim", "name_jp": "チャンジャ"}
-- 鶏のからあげ → {"name": "Karaage Chicken", "name_jp": "鶏のからあげ"}
-- フライドポテト → {"name": "French Fries", "name_jp": "フライドポテト"}
-- 厚揚げ → {"name": "Agedashi Tofu", "name_jp": "厚揚げ"}
-- メンチカツ → {"name": "Minchi Katsu", "name_jp": "メンチカツ"}
-- なんこつのからあげ → {"name": "Karaage Cartilage", "name_jp": "なんこつのからあげ"}
-- コロッケ → {"name": "Korokke", "name_jp": "コロッケ"}
-- ひとくちぎょうざ → {"name": "Gyoza", "name_jp": "ひとくちぎょうざ"}
-- 焼き明太子 → {"name": "Grilled Mentaiko", "name_jp": "焼き明太子"}
-- ホッケ焼き → {"name": "Grilled Hokke", "name_jp": "ホッケ焼き"}
-- チーズ春巻き → {"name": "Cheese Spring Rolls", "name_jp": "チーズ春巻き"}
-- トマトとモッツァレラ → {"name": "Tomato and Mozzarella", "name_jp": "トマトとモッツァレラ"}
-- シーザーサラダ → {"name": "Caesar Salad", "name_jp": "シーザーサラダ"}
-- ポテトサラダ → {"name": "Potato Salad", "name_jp": "ポテトサラダ"}
-- じゃこサラダ → {"name": "Chirimen Jako Salad", "name_jp": "じゃこサラダ"}
-- 本日の刺し盛り → {"name": "Today"s Sashimi Platter", "name_jp": "本日の刺し盛り"}
-- 鰹のたたき → {"name": "Tataki Bonito", "name_jp": "鰹のたたき"}
-- ゴマ鯖 → {"name": "Sesame Mackerel", "name_jp": "ゴマ鯖"}
-- ぶり → {"name": "Buri", "name_jp": "ぶり"}
-- サーモン → {"name": "Salmon", "name_jp": "サーモン"}
-- シャケおにぎり → {"name": "Salmon Onigiri", "name_jp": "シャケおにぎり"}
-- 高菜おにぎり → {"name": "Takana Onigiri", "name_jp": "高菜おにぎり"}
-- 明太おにぎり → {"name": "Mentaiko Onigiri", "name_jp": "明太おにぎり"}
-- お茶漬け → {"name": "Ochazuke", "name_jp": "お茶漬け"}
-- チャーハン → {"name": "Fried Rice", "name_jp": "チャーハン"}
 
 必ずJSON形式で返してください。説明文は不要です。
 `
