@@ -1,8 +1,7 @@
 import { getStorage } from "firebase-admin/storage"
+import { bucket as bucketName } from "../config"
 import { extMap } from "../constant"
 import type { GeneratedImage } from "../types"
-
-const BUCKET_NAME = "barbecue-trio.firebasestorage.app"
 
 // メニュー画像をアップロードする関数
 export async function uploadMenuImage(
@@ -27,7 +26,7 @@ async function uploadToStorage(
 ): Promise<void> {
   try {
     const storage = getStorage()
-    const bucket = storage.bucket(BUCKET_NAME)
+    const bucket = storage.bucket(bucketName)
     const buffer = Buffer.from(fileData, "base64")
     const filePath = `menuItemImage/${fileName}`
     const file = bucket.file(filePath)
