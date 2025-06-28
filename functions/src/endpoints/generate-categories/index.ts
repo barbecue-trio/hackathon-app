@@ -1,5 +1,5 @@
-import { onRequest } from "firebase-functions/v2/https";
-import { handleGenerateCategories } from "../../handlers/categoryHandler";
+import { onRequest } from "firebase-functions/v2/https"
+import { handleGenerateCategories } from "../../handlers/categoryHandler"
 
 // カテゴリー生成専用エンドポイント
 export const generateCategories = onRequest(
@@ -9,4 +9,4 @@ export const generateCategories = onRequest(
     memory: "512MiB",
   },
   handleGenerateCategories
-);
+)

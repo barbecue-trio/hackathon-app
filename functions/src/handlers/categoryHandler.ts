@@ -1,5 +1,5 @@
-import { Request } from "firebase-functions/v2/https";
-import {
+import type { Request } from "firebase-functions/v2/https";
+import type {
   GenerateFoodCultureRequest,
   GenerateFoodCultureResponse,
 } from "../types";

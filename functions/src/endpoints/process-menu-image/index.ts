@@ -1,5 +1,5 @@
-import { onRequest } from "firebase-functions/v2/https";
-import { handleProcessMenuImage } from "../../handlers/menuImageHandler";
+import { onRequest } from "firebase-functions/v2/https"
+import { handleProcessMenuImage } from "../../handlers/menuImageHandler"
 
 // メニュー画像処理エンドポイント
 export const processMenuImage = onRequest(
@@ -9,4 +9,4 @@ export const processMenuImage = onRequest(
     memory: "512MiB",
   },
   handleProcessMenuImage
-);
+)
