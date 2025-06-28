@@ -16,7 +16,7 @@ export type ImageData = {
  * @returns 生成された画像のbase64文字列とMIMEタイプのオブジェクト。生成に失敗した場合はnullを返します。
  */
 export async function generateImage(prompt: string): Promise<ImageData | null> {
-  const MAX_RETRIES = 3
+  const MAX_RETRIES = 5
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const res = await ai.models.generateContent({
