@@ -1,9 +1,9 @@
 import { GoogleGenAI, Modality } from "@google/genai"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { geminiApiKey } from "../config"
-import { allergyIdMap, allergyNameToIdMap } from "../data/allergens"
+import { allergenNameList, allergyNameToIdMap } from "../data/allergens"
 import {
-  religiousRestrictionIdMap,
+  religiousRestrictionNameList,
   religiousRestrictionNameToIdMap,
 } from "../data/religiousRestrictions"
 import type { GeneratedImage, MenuItem } from "../types"
@@ -433,6 +433,7 @@ ${menuName}の一般的な原材料をリスト形式で教えて下さい。
 
 ## 条件
 - 一般的な原材料をリストアップしてください
+- 原材料は英語の小文字で記載してください
 - 各原材料は、「,」で区切ってください
 - 各原材料は、**注釈や括弧書きを含めず、食材の名称のみ**を記載してください
 - **部位名などの詳細は除き、素材カテゴリとして一般的な名称で記載してください（例：豚バラ肉 → 豚肉）**
@@ -450,24 +451,18 @@ ${menuName}の一般的な原材料をリスト形式で教えて下さい。
 }
 
 // 原材料にアレルゲンが含まれているかをチェックする関数
-export async function checkAllergen(
-  ingredients: string[],
-  allergenIds: number[]
-): Promise<number[]> {
+export async function checkAllergen(ingredients: string[]): Promise<string[]> {
   const ingredientListStr = ingredients.join(", ")
-  const allergenList = allergenIds
-    .map((id) => allergyIdMap[id])
-    .filter((name): name is string => !!name)
-  const allergensListStr = allergenList.join(", ")
+  const allergensListStr = allergenNameList.join(", ")
 
   const prompt = `
-  「原材料リスト」に「チェック対象原材料」が含まれているかをチェックしてください。
-  「原材料リスト」と「チェック対象原材料」は以下のとおりです。
+  「原材料リスト」に「アレルゲン食材」が含まれているかをチェックしてください。
+  「原材料リスト」と「アレルゲン食材」は以下のとおりです。
 
   ## 原材料リスト
   ${ingredientListStr}
 
-  ## チェック対象原材料
+  ## アレルゲン食材
   ${allergensListStr}
 
   ---
@@ -475,12 +470,12 @@ export async function checkAllergen(
   以下の条件に必ず従ってください。
 
   ## 条件
-  - 「原材料リスト」に「チェック対象原材料」が含まれている場合は、「チェック対象原材料」の文字列をそのまま「,」区切りで返してください。
+  - 「原材料リスト」に「アレルゲン食材」が含まれている場合は、「アレルゲン食材」の文字列をそのまま「,」区切りで返してください。
   - 含まれていない場合は、「null」を返してください。
   `
 
   const result = await getTextResponse(prompt)
-  // チェック対象原材料が含まれていない場合は空文字列を返す
+  // アレルゲン食材が含まれていない場合は空文字列を返す
   if (result === "null") {
     return []
   }
@@ -496,18 +491,13 @@ export async function checkAllergen(
   return matchedAllergenNameList
     .map((name) => allergyNameToIdMap[name])
     .filter((id): id is number => typeof id === "number")
+    .map((id) => id.toString())
 }
 
 // 原材料に宗教的に食べれないものがあるかチェックする関数
-export async function checkReligiousRestriction(
-  ingredients: string[],
-  religiousRestrictionIds: number[]
-): Promise<number[]> {
+export async function checkReligiousRestriction(ingredients: string[]): Promise<string[]> {
   const ingredientListStr = ingredients.join(", ")
-  const religiousRestrictionList = religiousRestrictionIds
-    .map((id) => religiousRestrictionIdMap[id])
-    .filter((name): name is string => !!name)
-  const religiousRestrictionListStr = religiousRestrictionList.join(", ")
+  const religiousRestrictionListStr = religiousRestrictionNameList.join(", ")
 
   const prompt = `
 「宗教的・信条的な食事制限」のある人が食べられない原材料が「原材料リスト」にあるかチェックしてください。
@@ -516,7 +506,7 @@ export async function checkReligiousRestriction(
   ## 原材料リスト
   ${ingredientListStr}
 
-  ## チェック対象原材料
+  ## 宗教的・信条的な食事制限
   ${religiousRestrictionListStr}
 
   ---
@@ -524,12 +514,11 @@ export async function checkReligiousRestriction(
   以下の条件に必ず従ってください。
 
   ## 条件
-  -「宗教的・信条的な食事制限」のある人が食べられない原材料が「原材料リスト」に含まれている場合は、「宗教的・信条的な食事制限」の文字列をそのまま「,」区切りで返してください。
+  - 「宗教的・信条的な食事制限」で食べられない原材料が「原材料リスト」に含まれている場合は、「宗教的・信条的な食事制限」の文字列をそのまま「,」区切りで返してください。
   - 含まれていない場合は、「null」を返してください。
   `
 
   const result = await getTextResponse(prompt)
-  console.log("religious restriction:", result)
 
   if (result === "null") {
     return []
@@ -546,6 +535,7 @@ export async function checkReligiousRestriction(
   return matchedReligiousRestrictionNameList
     .map((name) => religiousRestrictionNameToIdMap[name])
     .filter((id): id is number => typeof id === "number")
+    .map((id) => id.toString())
 }
 
 // テキストでGemini APIから回答を取得する関数
