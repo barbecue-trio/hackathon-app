@@ -1,0 +1,98 @@
+name: Deploy Firebase Cloud Functions
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "functions/**"
+      - ".github/workflows/deploy-functions.yml"
+
+jobs:
+  deploy-functions:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: development
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "functions/package-lock.json"
+
+      - name: Install Functions dependencies
+        run: |
+          cd functions
+          npm ci
+
+      - name: Lint Functions code
+        run: |
+          cd functions
+          npm run lint
+
+      - name: Build Functions
+        run: |
+          cd functions
+          npm run build
+
+      - name: Verify required secrets
+        run: |
+          echo "Checking required secrets for Firebase deployment..."
+          if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" ]; then
+            echo "❌ ERROR: FIREBASE_SERVICE_ACCOUNT is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.GEMINI_API_KEY }}" ]; then
+            echo "❌ ERROR: GEMINI_API_KEY is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.BUCKET }}" ]; then
+            echo "❌ ERROR: BUCKET is not set"
+            exit 1
+          fi
+          echo "✅ All required secrets are configured"
+
+      - name: Setup Firebase CLI and authenticate
+        run: |
+          npm install -g firebase-tools
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > firebase-service-account.json
+
+      - name: Configure Functions environment variables
+        run: |
+          cd functions
+          echo "Setting Firebase Functions environment variables..."
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+          echo "BUCKET=${{ secrets.BUCKET }}" >> .env
+          echo "✅ Environment variables configured"
+
+      - name: Deploy Firebase Functions
+        run: |
+          echo "🚀 Deploying Firebase Functions to development environment..."
+          firebase deploy --only functions --project barbecue-trio
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: firebase-service-account.json
+
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          rm -f firebase-service-account.json
+          rm -f functions/.env
+          echo "🧹 Sensitive files cleanup completed"
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "🎉 Firebase Functions deployment successful!"
+          echo "📍 Environment: development"
+          echo "🌐 Project: barbecue-trio"
+          echo "📁 Deployed endpoints:"
+          echo "  - generate-categories"
+          echo "  - generate-food-culture" 
+          echo "  - process-menu-image"
+          echo "  - test-process-menu-image"
