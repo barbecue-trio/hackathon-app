@@ -7,12 +7,17 @@ import CheckItem from "../components/CheckItem"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 import MenuItem from "../components/MenuItem"
+import { getMenuCollectionId } from "../utils/localStorage"
+import { getMenuCollection } from "../services/firestoreService"
+import type { MenuItem as MenuItemType } from "../../types"
 
 interface LocationState {
   uploadedImage?: string
   imagePath?: string
   fileSize?: number
   contentType?: string
+  menuCollectionId?: string
+  menuCount?: number
 }
 
 function Menu() {
@@ -25,6 +30,10 @@ function Menu() {
     "No Pork": false,
   })
 
+  // Menu items state
+  const [menuItems, setMenuItems] = useState<MenuItemType[]>([])
+  const [isLoadingMenu, setIsLoadingMenu] = useState(true)
+
   // アップロードされた画像の情報をログ出力
   useEffect(() => {
     if (state?.uploadedImage) {
@@ -33,30 +42,52 @@ function Menu() {
     }
   }, [state])
 
+  // メニューデータを取得
+  useEffect(() => {
+    const fetchMenuData = async () => {
+      try {
+        setIsLoadingMenu(true)
+        
+        // ローカルストレージからメニューコレクションIDを取得
+        let documentId = getMenuCollectionId() || ""
+
+        console.log("documentId:", documentId)
+
+        if (!documentId) {
+          console.warn("メニューコレクションIDが見つかりません")
+          setMenuItems([])
+          return
+        }
+
+        // 新しいFirestoreサービスを使用してメニューコレクションを取得
+        const menuCollection = await getMenuCollection(documentId)
+        console.log("取得したメニューコレクション:", menuCollection)
+
+        if (menuCollection && menuCollection.menus.length > 0) {
+          setMenuItems(menuCollection.menus)
+          console.log("取得したメニューアイテム:", menuCollection.menus)
+        } else {
+          console.warn("メニューアイテムが見つかりません")
+          setMenuItems([])
+        }
+
+      } catch (error) {
+        console.error("メニューデータの取得に失敗しました:", error)
+        setMenuItems([])
+      } finally {
+        setIsLoadingMenu(false)
+      }
+    }
+
+    fetchMenuData()
+  }, [state?.menuCollectionId])
+
   const handleDietaryChange = (restriction: string, checked: boolean) => {
     setDietaryRestrictions((prev) => ({
       ...prev,
       [restriction]: checked,
     }))
   }
-
-  const menuItems = [
-    {
-      title: "Vegetable Tempura",
-      ingredients: "Contains: Tofu, Vegetables",
-      imageSrc: menuItemImg,
-    },
-    {
-      title: "Vegetable Tempura",
-      ingredients: "Contains: Tofu, Vegetables",
-      imageSrc: menuItemImg,
-    },
-    {
-      title: "Vegetable Tempura",
-      ingredients: "Contains: Tofu, Vegetables",
-      imageSrc: menuItemImg,
-    },
-  ]
 
   return (
     <Box className="app-container">
@@ -144,6 +175,18 @@ function Menu() {
                     }}
                   >
                     <strong>ファイル形式:</strong> {state.contentType}
+                  </Typography>
+                )}
+
+                {state.menuCollectionId && (
+                  <Typography
+                    sx={{
+                      fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                      fontSize: 12,
+                      color: "#666",
+                    }}
+                  >
+                    <strong>Menu Collection ID:</strong> {state.menuCollectionId}
                   </Typography>
                 )}
 
@@ -239,25 +282,65 @@ function Menu() {
                 width: "100%",
               }}
             >
-              Menu Items
+              Menu Items {isLoadingMenu ? "(読み込み中...)" : `(${menuItems.length}件)`}
             </Typography>
           </Box>
 
-          {/* Menu Items List */}
+          {/* Loading or Menu Items List */}
           <Box
             sx={{
               width: "100%",
               backgroundColor: "#FFFFFF",
             }}
           >
-            {menuItems.map((item, index) => (
-              <MenuItem
-                key={`${item.title}-${index}`}
-                title={item.title}
-                ingredients={item.ingredients}
-                imageSrc={item.imageSrc}
-              />
-            ))}
+            {isLoadingMenu ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "40px 16px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                    fontSize: 16,
+                    color: "#666",
+                  }}
+                >
+                  メニューデータを読み込み中...
+                </Typography>
+              </Box>
+            ) : menuItems.length > 0 ? (
+              menuItems.map((item, index) => (
+                <MenuItem
+                  key={item.name + index}
+                  title={item.name}
+                  ingredients={item.ingredients.join(", ")}
+                  imageSrc={menuItemImg}
+                />
+              ))
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "40px 16px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                    fontSize: 16,
+                    color: "#666",
+                  }}
+                >
+                  メニューデータが見つかりませんでした
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Box>
 
