@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useLocation } from "react-router-dom"
 // Vite static asset import
 import menuItemImg from "../assets/images/menu-item-image.png"
@@ -10,6 +10,9 @@ import MenuItem from "../components/MenuItem"
 import { getMenuCollectionId } from "../utils/localStorage"
 import { getMenuCollection } from "../services/firestoreService"
 import type { MenuItem as MenuItemType } from "../../types"
+// 統合型定義システムから宗教的制約情報をインポート
+import { religiousRestrictionList } from "../data/religiousRestrictions"
+import { religiousRestrictionNameToIdMap } from "../../types/religious"
 
 interface LocationState {
   uploadedImage?: string
@@ -24,10 +27,16 @@ function Menu() {
   const location = useLocation()
   const state = location.state as LocationState
 
-  // Dietary Restrictions state
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<Record<string, boolean>>({
-    Vegetarian: false,
-    "No Pork": false,
+  // Dietary Restrictions state - 宗教的制約のみ
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<Record<string, boolean>>(() => {
+    const initialState: Record<string, boolean> = {}
+    
+    // 宗教的制約項目を追加
+    religiousRestrictionList.forEach(restriction => {
+      initialState[restriction.name] = false
+    })
+    
+    return initialState
   })
 
   // Menu items state
@@ -81,6 +90,35 @@ function Menu() {
 
     fetchMenuData()
   }, [state?.menuCollectionId])
+
+  // チェックされた宗教的制約に基づいてメニューをフィルタリング
+  const filteredMenuItems = useMemo(() => {
+    // チェックされた宗教的制約のIDリストを取得
+    const selectedRestrictionIds = Object.entries(dietaryRestrictions)
+      .filter(([_, checked]) => checked)
+      .map(([restrictionName, _]) => religiousRestrictionNameToIdMap[restrictionName])
+      .filter(id => id !== undefined)
+
+    console.log("選択された宗教的制約ID:", selectedRestrictionIds)
+
+    // 選択された制約がない場合は全てのメニューを表示
+    if (selectedRestrictionIds.length === 0) {
+      return menuItems
+    }
+
+    // 選択された宗教的制約を含むメニューを除外
+    const filtered = menuItems.filter(item => {
+      const hasRestrictedIngredients = item.dietary_restriction_ids.some(id => 
+        selectedRestrictionIds.includes(id)
+      )
+      return !hasRestrictedIngredients
+    })
+
+    console.log("フィルタリング前のメニュー数:", menuItems.length)
+    console.log("フィルタリング後のメニュー数:", filtered.length)
+
+    return filtered
+  }, [menuItems, dietaryRestrictions])
 
   const handleDietaryChange = (restriction: string, checked: boolean) => {
     setDietaryRestrictions((prev) => ({
@@ -244,16 +282,14 @@ function Menu() {
               width: "100%",
             }}
           >
-            {Object.entries(dietaryRestrictions).map(([restriction, checked]) => (
+            {religiousRestrictionList.map((restriction) => (
               <CheckItem
-                key={restriction}
-                label={restriction}
-                checked={checked}
-                onChange={(newChecked) => handleDietaryChange(restriction, newChecked)}
+                key={restriction.name}
+                label={restriction.name}
+                checked={dietaryRestrictions[restriction.name] || false}
+                onChange={(newChecked) => handleDietaryChange(restriction.name, newChecked)}
               />
             ))}
-            {/* Additional Vegetarian item as shown in Figma */}
-            <CheckItem label="Vegetarian" checked={false} onChange={() => {}} />
           </Box>
 
           {/* Menu Items Section */}
@@ -282,7 +318,7 @@ function Menu() {
                 width: "100%",
               }}
             >
-              Menu Items {isLoadingMenu ? "(読み込み中...)" : `(${menuItems.length}件)`}
+              Menu Items {isLoadingMenu ? "(読み込み中...)" : `(${filteredMenuItems.length}件)`}
             </Typography>
           </Box>
 
@@ -312,8 +348,8 @@ function Menu() {
                   メニューデータを読み込み中...
                 </Typography>
               </Box>
-            ) : menuItems.length > 0 ? (
-              menuItems.map((item, index) => (
+            ) : filteredMenuItems.length > 0 ? (
+              filteredMenuItems.map((item, index) => (
                 <MenuItem
                   key={item.name + index}
                   title={item.name}
@@ -321,6 +357,38 @@ function Menu() {
                   imageSrc={menuItemImg}
                 />
               ))
+            ) : menuItems.length > 0 ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "40px 16px",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                    fontSize: 16,
+                    color: "#666",
+                    textAlign: "center",
+                    marginBottom: "8px",
+                  }}
+                >
+                  選択された宗教的制約に適合するメニューが見つかりませんでした
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: '"Spline Sans", "Roboto", sans-serif',
+                    fontSize: 14,
+                    color: "#999",
+                    textAlign: "center",
+                  }}
+                >
+                  フィルター条件を変更してください
+                </Typography>
+              </Box>
             ) : (
               <Box
                 sx={{
