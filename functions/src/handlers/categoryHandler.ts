@@ -1,4 +1,4 @@
-import type { GenerateFoodCultureRequest, GenerateFoodCultureResponse } from "@/types"
+import type { GenerateFoodCultureRequest, GenerateFoodCultureResponse } from "../types"
 import type { Request } from "firebase-functions/v2/https"
 import { determineCategoriesForAllMenus } from "../services/aiService"
 import { getMenuCollection, updateMenuCollection } from "../services/firestoreService"

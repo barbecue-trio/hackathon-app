@@ -1,4 +1,4 @@
-import type { MenuCollection } from "@/types"
+import type { MenuCollection } from "../types"
 import type { Request } from "firebase-functions/v2/https"
 import { generateMenuImage } from "../services/aiService"
 import { uploadMenuImage } from "../services/cloudStorageService"

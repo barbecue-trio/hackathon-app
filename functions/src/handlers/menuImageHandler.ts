@@ -1,4 +1,4 @@
-import type { MenuCollection, ProcessImageRequest, ProcessImageResponse } from "@/types"
+import type { MenuCollection, ProcessImageRequest, ProcessImageResponse } from "../types"
 import type { Request } from "firebase-functions/v2/https"
 import { bucket } from "../config"
 import { extractMenuWithGoogleAI } from "../services/aiService"
