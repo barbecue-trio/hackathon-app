@@ -1,6 +1,7 @@
 import { GoogleAIBackend, getAI, getGenerativeModel } from "firebase/ai"
 import { getAnalytics } from "firebase/analytics"
 import { initializeApp } from "firebase/app"
+import { getFirestore } from "firebase/firestore"
 import { getStorage } from "firebase/storage"
 
 const firebaseConfig = {
@@ -13,12 +14,15 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 }
 
+const dbName = import.meta.env.VITE_FIREBASE_DB_NAME
+
 const app = initializeApp(firebaseConfig)
 const analytics = getAnalytics(app)
 const storage = getStorage(app)
+const firestore = getFirestore(app, dbName)
 const ai = getAI(app, { backend: new GoogleAIBackend() })
 const modelName = import.meta.env.VITE_FIREBASE_AI_MODEL || "gemini-2.5-flash"
 const model = getGenerativeModel(ai, { model: modelName })
 
 export default app
-export { analytics, storage, model }
+export { analytics, storage, firestore, model }

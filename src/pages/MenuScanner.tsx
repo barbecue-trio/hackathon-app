@@ -6,6 +6,7 @@ import Footer from "../components/Footer"
 import Header from "../components/Header"
 import { uploadImageToStorage } from "../services/imageUpload"
 import { processMenuImage } from "../services/menuProcessingService"
+import { saveMenuCollectionId } from "../utils/localStorage"
 
 function MenuScanner() {
   const navigate = useNavigate()
@@ -62,42 +63,35 @@ function MenuScanner() {
 
         // documentIdをローカルストレージに保存
         if (processResult.success && processResult.documentId) {
-          localStorage.setItem("menuCollectionId", processResult.documentId)
+          saveMenuCollectionId(processResult.documentId)
           console.log("menuCollectionId saved:", processResult.documentId)
         }
 
         // Menu Analysisページに遷移
-        setTimeout(() => {
-          setIsUploading(false)
-          setUploadStatus("")
-          setUploadProgress(0)
-          navigate("/menu", {
-            state: {
-              uploadedImage: result.downloadURL,
-              imagePath: result.filePath,
-              fileSize: result.fileSize,
-              contentType: result.contentType,
-              menuCollectionId: processResult.documentId,
-              menuCount: processResult.menuCount,
-            },
-          })
-        }, 1000)
+        navigate("/menu", {
+          state: {
+            uploadedImage: result.downloadURL,
+            imagePath: result.filePath,
+            fileSize: result.fileSize,
+            contentType: result.contentType,
+            menuCollectionId: processResult.documentId,
+            menuCount: processResult.menuCount,
+          },
+        })
       } catch (apiError) {
         console.error("Menu processing API error:", apiError)
         // API エラーの場合でもページ遷移は継続（フォールバック）
-        setTimeout(() => {
-          setIsUploading(false)
-          setUploadStatus("")
-          setUploadProgress(0)
-          navigate("/menu", {
-            state: {
-              uploadedImage: result.downloadURL,
-              imagePath: result.filePath,
-              fileSize: result.fileSize,
-              contentType: result.contentType,
-            },
-          })
-        }, 1000)
+        setIsUploading(false)
+        setUploadStatus("")
+        setUploadProgress(0)
+        navigate("/menu", {
+          state: {
+            uploadedImage: result.downloadURL,
+            imagePath: result.filePath,
+            fileSize: result.fileSize,
+            contentType: result.contentType,
+          },
+        })
 
         // エラーメッセージを表示
         alert("メニューの解析に失敗しました。手動でメニューを確認してください。")

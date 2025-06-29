@@ -5,4 +5,4 @@ export {
   type Allergy,
   allergyIdMap,
   allergyList,
-} from "@/types"
+} from "../../types"

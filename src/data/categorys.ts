@@ -5,4 +5,4 @@ export {
   type Category,
   categoryIdMap,
   categoryList,
-} from "@/types"
+} from "../../types"
