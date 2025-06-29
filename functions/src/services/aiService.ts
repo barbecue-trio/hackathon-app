@@ -10,6 +10,10 @@ import {
   createCategoryBatchPrompt,
   createCategoryIndividualPrompt,
   createFoodCulturePrompt,
+  createMenuImagePrompt,
+  createIngredientsPrompt,
+  createAllergenCheckPrompt,
+  createReligiousRestrictionCheckPrompt,
 } from "../prompts"
 import type { GeneratedImage, MenuItem } from "../types"
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
@@ -281,20 +285,7 @@ async function determineCategoryFromMenuName(name: string, nameJp: string): Prom
 
 // メニュー名から画像を生成する関数
 export async function generateMenuImage(menuName: string): Promise<GeneratedImage | null> {
-  const prompt = `
-料理名：${menuName}の画像を生成してください。
-生成する際には以下の条件に従ってください。
-
-## 条件
-- 画像のスタイル: 写実的で食品サンプルやディスプレイ用の料理写真
-- 画像のテーマ: ${menuName}の料理が主役となるように、他の要素は一切含めない
-- 画像の背景: シンプルで料理が引き立つように、背景は白または淡い色にしてください
-- 画像の構図: 料理が中央に配置され、全体がよく見えるように、クローズアップで、余計なものが写り込まないようにしてください
-- **文字、ロゴ、ブランド名、日付、透かし、その他のテキストは一切含めないでください。**
-- **人間、手、食器の一部（料理を盛る皿以外）、その他の物体は含めないでください。**
-- [ID: ${Date.now()}]
-`
-
+  const prompt = createMenuImagePrompt(menuName)
   return await generateImage(prompt)
 }
 
@@ -343,19 +334,7 @@ async function generateImage(prompt: string): Promise<GeneratedImage | null> {
 
 // メニューの原材料を生成する関数
 export async function generateIngredients(menuName: string): Promise<string[]> {
-  const prompt = `
-${menuName}の一般的な原材料をリスト形式で教えて下さい。
-以下の条件に必ず従ってください。
-
-## 条件
-- 一般的な原材料をリストアップしてください
-- 原材料は英語の小文字で記載してください
-- 各原材料は、「,」で区切ってください
-- 各原材料は、**注釈や括弧書きを含めず、食材の名称のみ**を記載してください
-- **部位名などの詳細は除き、素材カテゴリとして一般的な名称で記載してください（例：豚バラ肉 → 豚肉）**
-- リストには、**主な原材料のみ**を含めてください
-- 材料以外には何も記載しないでください
-`
+  const prompt = createIngredientsPrompt(menuName)
   const result = await getTextResponse(prompt)
   if (!result) {
     throw new Error("Failed to generate ingredients")
@@ -370,26 +349,7 @@ ${menuName}の一般的な原材料をリスト形式で教えて下さい。
 export async function checkAllergen(ingredients: string[]): Promise<string[]> {
   const ingredientListStr = ingredients.join(", ")
   const allergensListStr = allergenNameList.join(", ")
-
-  const prompt = `
-  「原材料リスト」に「アレルゲン食材」が含まれているかをチェックしてください。
-  「原材料リスト」と「アレルゲン食材」は以下のとおりです。
-
-  ## 原材料リスト
-  ${ingredientListStr}
-
-  ## アレルゲン食材
-  ${allergensListStr}
-
-  ---
-
-  以下の条件に必ず従ってください。
-
-  ## 条件
-  - 「原材料リスト」に「アレルゲン食材」が含まれている場合は、「アレルゲン食材」の文字列をそのまま「,」区切りで返してください。
-  - 含まれていない場合は、「null」を返してください。
-  `
-
+  const prompt = createAllergenCheckPrompt(ingredientListStr, allergensListStr)
   const result = await getTextResponse(prompt)
   // アレルゲン食材が含まれていない場合は空文字列を返す
   if (result === "null") {
@@ -414,26 +374,7 @@ export async function checkAllergen(ingredients: string[]): Promise<string[]> {
 export async function checkReligiousRestriction(ingredients: string[]): Promise<string[]> {
   const ingredientListStr = ingredients.join(", ")
   const religiousRestrictionListStr = religiousRestrictionNameList.join(", ")
-
-  const prompt = `
-「宗教的・信条的な食事制限」のある人が食べられない原材料が「原材料リスト」にあるかチェックしてください。
-  「原材料リスト」と「宗教的・信条的な食事制限」は以下のとおりです。
-
-  ## 原材料リスト
-  ${ingredientListStr}
-
-  ## 宗教的・信条的な食事制限
-  ${religiousRestrictionListStr}
-
-  ---
-
-  以下の条件に必ず従ってください。
-
-  ## 条件
-  - 「宗教的・信条的な食事制限」で食べられない原材料が「原材料リスト」に含まれている場合は、「宗教的・信条的な食事制限」の文字列をそのまま「,」区切りで返してください。
-  - 含まれていない場合は、「null」を返してください。
-  `
-
+  const prompt = createReligiousRestrictionCheckPrompt(ingredientListStr, religiousRestrictionListStr)
   const result = await getTextResponse(prompt)
 
   if (result === "null") {
