@@ -1,10 +1,6 @@
+import type { UploadProgressCallback } from "@/types"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { storage } from "../firebase"
-
-/**
- * アップロード進捗を通知するコールバック関数の型
- */
-export type UploadProgressCallback = (progress: number) => void
 
 /**
  * 画像ファイルのサイズ制限とフォーマットをチェックする

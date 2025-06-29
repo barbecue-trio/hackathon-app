@@ -1,4 +1,6 @@
-// 型定義
+// functions固有の型定義
+// 共通の型定義はルートの /types/index.ts に移動済み
+
 export interface MenuItem {
   name: string
   name_jp: string

@@ -35,7 +35,7 @@ function MenuScanner() {
 
     try {
       // Firebase Cloud Storageにアップロード（進捗コールバック付き）
-      const result = await uploadImageToStorage(file, "menuImages", (progress) => {
+      const result = await uploadImageToStorage(file, "menuImages", (progress: number) => {
         setUploadProgress(progress)
         if (progress < 25) {
           setUploadStatus("アップロード準備中...")
