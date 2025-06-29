@@ -1,7 +1,7 @@
+import type { GenerateFoodCultureRequest, GenerateFoodCultureResponse } from "../types"
 import type { Request } from "firebase-functions/v2/https"
 import { determineCategoriesForAllMenus } from "../services/aiService"
 import { getMenuCollection, updateMenuCollection } from "../services/firestoreService"
-import type { GenerateFoodCultureRequest, GenerateFoodCultureResponse } from "../types"
 
 export async function handleGenerateCategories(request: Request, response: any): Promise<void> {
   try {
@@ -54,7 +54,7 @@ export async function generateCategoriesForDocument(documentId: string): Promise
 
     const updatedMenus = [...menuCollection.menus]
     for (let i = 0; i < updatedMenus.length; i++) {
-      updatedMenus[i].category_id = categoryResults[i].toString()
+      updatedMenus[i].category_id = categoryResults[i] as 1 | 2 | 3 | 4 | 5
     }
 
     // Firestoreを更新

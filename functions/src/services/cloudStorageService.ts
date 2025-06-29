@@ -1,7 +1,7 @@
+import type { GeneratedImage } from "../types"
 import { getStorage } from "firebase-admin/storage"
 import { bucket as bucketName } from "../config"
 import { extMap } from "../constant"
-import type { GeneratedImage } from "../types"
 
 // メニュー画像をアップロードする関数
 export async function uploadMenuImage(

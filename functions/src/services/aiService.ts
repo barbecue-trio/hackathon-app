@@ -1,3 +1,4 @@
+import type { GeneratedImage, MenuItem } from "../types"
 import { GoogleGenAI, Modality } from "@google/genai"
 import { geminiApiKey } from "../config"
 import { allergenNameList, allergyNameToIdMap } from "../data/allergens"
@@ -15,7 +16,6 @@ import {
   createAllergenCheckPrompt,
   createReligiousRestrictionCheckPrompt,
 } from "../prompts"
-import type { GeneratedImage, MenuItem } from "../types"
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
 
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"

@@ -1,41 +1,6 @@
-// 型定義
-export interface MenuItem {
-  name: string
-  name_jp: string
-  image_id: string
-  ingredients: string[]
-  allergy_ids: string[]
-  dietary_restriction_ids: string[]
-  category_id: string
-  food_culture: string
-}
+// functions固有の型定義
+// 統合型定義に含まれないfunctions特有の型のみここに定義
 
-export interface MenuCollection {
-  menus: MenuItem[]
-}
-
-export interface ProcessImageRequest {
-  storageId: string
-}
-
-export interface ProcessImageResponse {
-  success: boolean
-  documentId?: string
-  error?: string
-  menuCount?: number
-}
-
-export interface GenerateFoodCultureRequest {
-  documentId: string
-}
-
-export interface GenerateFoodCultureResponse {
-  success: boolean
-  error?: string
-  processedCount?: number
-}
-
-export interface GeneratedImage {
-  base64: string
-  mimeType: string
-}
+// 現在のところ、すべての型定義が統合型定義に移動されたため、
+// このファイルは空になります
+// 必要に応じて将来的にfunctions固有の型を追加可能

@@ -7,8 +7,11 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "typeRoots": ["node_modules/@types", "../types"]
   },
   "compileOnSave": true,
-  "include": ["src"]
+  "include": ["src/**/*"],
+  "exclude": ["lib"]
 }

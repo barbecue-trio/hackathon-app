@@ -1,8 +1,8 @@
+import type { MenuCollection, ProcessImageResponse } from "../types"
 import type { Request } from "firebase-functions/v2/https"
 import { bucket } from "../config"
 import { extractMenuWithGoogleAI } from "../services/aiService"
 import { saveMenuData } from "../services/firestoreService"
-import type { MenuCollection, ProcessImageResponse } from "../types"
 import { generateCategoriesForDocument } from "./categoryHandler"
 import { generateFoodCultureForDocument } from "./foodCultureHandler"
 
@@ -45,7 +45,7 @@ export async function handleTestProcessMenuImage(request: Request, response: any
         ingredients: [],
         allergy_ids: [],
         dietary_restriction_ids: [],
-        category_id: "",
+        category_id: 5, // デフォルト値：その他
         food_culture: "",
       })),
     }

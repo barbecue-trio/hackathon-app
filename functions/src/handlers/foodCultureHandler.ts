@@ -1,7 +1,7 @@
+import type { GenerateFoodCultureRequest, GenerateFoodCultureResponse } from "../types"
 import type { Request } from "firebase-functions/v2/https"
 import { generateFoodCultureWithAI } from "../services/aiService"
 import { getMenuCollection, updateMenuCollection } from "../services/firestoreService"
-import type { GenerateFoodCultureRequest, GenerateFoodCultureResponse } from "../types"
 
 export async function handleGenerateFoodCulture(request: Request, response: any): Promise<void> {
   try {

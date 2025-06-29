@@ -1,6 +1,6 @@
+import type { MenuCollection } from "../types"
 import * as admin from "firebase-admin"
 import { db } from "../config"
-import type { MenuCollection } from "../types"
 
 export async function saveMenuData(menuCollection: MenuCollection): Promise<string> {
   try {
