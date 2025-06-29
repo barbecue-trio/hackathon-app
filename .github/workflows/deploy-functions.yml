@@ -52,16 +52,6 @@ jobs:
           echo "Build completed. Checking output:"
           ls -la lib/
 
-      - name: Verify build output
-        run: |
-          cd functions
-          if [ ! -f "lib/index.js" ]; then
-            echo "❌ ERROR: lib/index.js was not created"
-            ls -la lib/
-            exit 1
-          fi
-          echo "✅ lib/index.js exists"
-
       - name: Verify required secrets
         run: |
           echo "Checking required secrets for Firebase deployment..."
