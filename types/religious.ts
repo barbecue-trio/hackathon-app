@@ -30,6 +30,22 @@ export const religiousRestrictionIdMap: Record<number, string> = Object.values(
   {} as Record<number, string>
 )
 
+// 宗教的制約名から宗教的制約IDへのマップ（逆引き）
+export const religiousRestrictionNameToIdMap: Record<string, number> = Object.entries(
+  religiousRestrictionIdMap
+).reduce(
+  (acc, [id, name]) => {
+    acc[name] = Number(id)
+    return acc
+  },
+  {} as Record<string, number>
+)
+
 // リスト型
 export const religiousRestrictionList: ReligiousRestriction[] =
   Object.values(RELIGIOUS_RESTRICTIONS)
+
+// 宗教的制約名のリスト
+export const religiousRestrictionNameList = Object.values(RELIGIOUS_RESTRICTIONS).map(
+  (restriction) => restriction.name
+)
