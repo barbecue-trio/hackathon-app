@@ -1,8 +1,8 @@
-import { GoogleAIBackend, getAI, getGenerativeModel } from "firebase/ai";
-import { getAnalytics } from "firebase/analytics";
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { GoogleAIBackend, getAI, getGenerativeModel } from "firebase/ai"
+import { getAnalytics } from "firebase/analytics"
+import { initializeApp } from "firebase/app"
+import { getFirestore } from "firebase/firestore"
+import { getStorage } from "firebase/storage"
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,17 +12,17 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-};
+}
 
-const dbName = import.meta.env.VITE_FIREBASE_DB_NAME;
+const dbName = import.meta.env.VITE_FIREBASE_DB_NAME
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const storage = getStorage(app);
-const firestore = getFirestore(app, dbName);
-const ai = getAI(app, { backend: new GoogleAIBackend() });
-const modelName = import.meta.env.VITE_FIREBASE_AI_MODEL || "gemini-2.5-flash";
-const model = getGenerativeModel(ai, { model: modelName });
+const app = initializeApp(firebaseConfig)
+const analytics = getAnalytics(app)
+const storage = getStorage(app)
+const firestore = getFirestore(app, dbName)
+const ai = getAI(app, { backend: new GoogleAIBackend() })
+const modelName = import.meta.env.VITE_FIREBASE_AI_MODEL || "gemini-2.5-flash"
+const model = getGenerativeModel(ai, { model: modelName })
 
-export default app;
-export { analytics, storage, firestore, model };
+export default app
+export { analytics, storage, firestore, model }

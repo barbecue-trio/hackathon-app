@@ -1,9 +1,7 @@
-import type { MenuProcessingResponse } from "@/types";
+import type { MenuProcessingResponse } from "@/types"
 
-export const processMenuImage = async (
-  storageId: string
-): Promise<MenuProcessingResponse> => {
-  const apiEndpoint = import.meta.env.VITE_MENU_PROCESSING_API_URL || "";
+export const processMenuImage = async (storageId: string): Promise<MenuProcessingResponse> => {
+  const apiEndpoint = import.meta.env.VITE_MENU_PROCESSING_API_URL || ""
 
   const response = await fetch(apiEndpoint, {
     method: "POST",
@@ -13,12 +11,12 @@ export const processMenuImage = async (
     body: JSON.stringify({
       storageId,
     }),
-  });
+  })
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    throw new Error(`API request failed: ${response.status}`)
   }
 
-  const result = await response.json();
-  return result;
-};
+  const result = await response.json()
+  return result
+}
