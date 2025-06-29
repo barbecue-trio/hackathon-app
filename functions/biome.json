@@ -22,6 +22,10 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "useHookAtTopLevel": "error"
+      },
       "suspicious": {
         "noExplicitAny": "warn"
       },
