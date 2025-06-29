@@ -31,6 +31,14 @@ jobs:
           cd functions
           npm ci
 
+      - name: Verify project structure
+        run: |
+          echo "Verifying project structure..."
+          ls -la types/
+          ls -la functions/src/
+          echo "TypeScript config:"
+          cat functions/tsconfig.json
+
       - name: Lint Functions code
         run: |
           cd functions
@@ -39,7 +47,10 @@ jobs:
       - name: Build Functions
         run: |
           cd functions
+          echo "Starting TypeScript build..."
           npm run build
+          echo "Build completed. Checking output:"
+          ls -la lib/
 
       - name: Verify required secrets
         run: |
