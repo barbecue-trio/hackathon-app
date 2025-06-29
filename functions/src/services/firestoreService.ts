@@ -1,4 +1,4 @@
-import type { MenuCollection } from "@/types"
+import type { MenuCollection } from "../types"
 import * as admin from "firebase-admin"
 import { db } from "../config"
 

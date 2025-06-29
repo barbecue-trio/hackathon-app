@@ -1,4 +1,4 @@
-import type { GeneratedImage, MenuItem } from "@/types"
+import type { GeneratedImage, MenuItem } from "../types"
 import { GoogleGenAI, Modality } from "@google/genai"
 import { geminiApiKey } from "../config"
 import {
