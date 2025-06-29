@@ -1,11 +1,11 @@
 import { GoogleGenAI, Modality } from "@google/genai"
+import { geminiApiKey } from "../config"
 import {
   allergenNameList,
   allergyNameToIdMap,
   religiousRestrictionNameList,
   religiousRestrictionNameToIdMap,
-} from "src/constants"
-import { geminiApiKey } from "../config"
+} from "../constants"
 import {
   MENU_EXTRACTION_PROMPT,
   createAllergenCheckPrompt,
