@@ -1,8 +1,8 @@
+import type { MenuCollection } from "@/types"
 import type { Request } from "firebase-functions/v2/https"
 import { generateMenuImage } from "../services/aiService"
 import { uploadMenuImage } from "../services/cloudStorageService"
 import { getMenuCollection, updateMenuCollection } from "../services/firestoreService"
-import type { MenuCollection } from "../types"
 
 export async function handleGenerateMenuImage(request: Request, response: any): Promise<void> {
   if (request.method !== "POST") {
