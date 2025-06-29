@@ -16,7 +16,6 @@ import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
 
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"
 const TEXT_MODEL = "gemini-2.5-flash"
-const MODEL = "gemini-1.5-flash"
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" })
 const textModelAI = new GoogleGenAI({
   apiKey: geminiApiKey || "",
@@ -461,7 +460,7 @@ async function getTextResponse(prompt: string): Promise<string> {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const response = await ai.models.generateContent({
-        model: MODEL,
+        model: TEXT_MODEL,
         contents: prompt,
       })
       if (!response || !response.text) {
