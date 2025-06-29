@@ -46,5 +46,17 @@ export const allergyIdMap: Record<number, string> = Object.values(ALLERGENS).red
   {} as Record<number, string>
 )
 
+// アレルゲン名からアレルゲンIDへのマップ（逆引き
+export const allergyNameToIdMap: Record<string, number> = Object.entries(allergyIdMap).reduce(
+  (acc, [id, name]) => {
+    acc[name] = Number(id)
+    return acc
+  },
+  {} as Record<string, number>
+)
+
 // リスト型
 export const allergyList: Allergy[] = Object.values(ALLERGENS)
+
+// アレルゲン名のリスト
+export const allergenNameList = Object.values(ALLERGENS).map((allergen) => allergen.name)

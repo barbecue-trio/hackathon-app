@@ -104,3 +104,93 @@ export const createCategoryIndividualPrompt = (name: string, nameJp: string): st
 - 握り寿司 → 4
 - 焼き鳥 → 5
 `
+
+/**
+ * メニュー画像生成用プロンプト
+ * @param menuName メニュー名
+ */
+export const createMenuImagePrompt = (menuName: string): string => `
+料理名：${menuName}の画像を生成してください。
+生成する際には以下の条件に従ってください。
+
+## 条件
+- 画像のスタイル: 写実的で食品サンプルやディスプレイ用の料理写真
+- 画像のテーマ: ${menuName}の料理が主役となるように、他の要素は一切含めない
+- 画像の背景: シンプルで料理が引き立つように、背景は白または淡い色にしてください
+- 画像の構図: 料理が中央に配置され、全体がよく見えるように、クローズアップで、余計なものが写り込まないようにしてください
+- **文字、ロゴ、ブランド名、日付、透かし、その他のテキストは一切含めないでください。**
+- **人間、手、食器の一部（料理を盛る皿以外）、その他の物体は含めないでください。**
+- [ID: ${Date.now()}]
+`
+
+/**
+ * 原材料リスト生成用プロンプト
+ * @param menuName メニュー名
+ */
+export const createIngredientsPrompt = (menuName: string): string => `
+${menuName}の一般的な原材料をリスト形式で教えて下さい。
+以下の条件に必ず従ってください。
+
+## 条件
+- 一般的な原材料をリストアップしてください
+- 原材料は英語の小文字で記載してください
+- 各原材料は、「,」で区切ってください
+- 各原材料は、**注釈や括弧書きを含めず、食材の名称のみ**を記載してください
+- **部位名などの詳細は除き、素材カテゴリとして一般的な名称で記載してください（例：豚バラ肉 → 豚肉）**
+- リストには、**主な原材料のみ**を含めてください
+- 材料以外には何も記載しないでください
+`
+
+/**
+ * アレルゲンチェック用プロンプト
+ * @param ingredientListStr 原材料リスト
+ * @param allergensListStr アレルゲンリスト
+ */
+export const createAllergenCheckPrompt = (
+  ingredientListStr: string,
+  allergensListStr: string
+): string => `
+  「原材料リスト」に「アレルゲン食材」が含まれているかをチェックしてください。
+  「原材料リスト」と「アレルゲン食材」は以下のとおりです。
+
+  ## 原材料リスト
+  ${ingredientListStr}
+
+  ## アレルゲン食材
+  ${allergensListStr}
+
+  ---
+
+  以下の条件に必ず従ってください。
+
+  ## 条件
+  - 「原材料リスト」に「アレルゲン食材」が含まれている場合は、「アレルゲン食材」の文字列をそのまま「,」区切りで返してください。
+  - 含まれていない場合は、「null」を返してください。
+  `
+
+/**
+ * 宗教的制限チェック用プロンプト
+ * @param ingredientListStr 原材料リスト
+ * @param religiousRestrictionListStr 宗教的制限リスト
+ */
+export const createReligiousRestrictionCheckPrompt = (
+  ingredientListStr: string,
+  religiousRestrictionListStr: string
+): string => `
+「宗教的・信条的な食事制限」のある人が食べられない原材料が「原材料リスト」にあるかチェックしてください。
+  「原材料リスト」と「宗教的・信条的な食事制限」は以下のとおりです。
+
+  ## 原材料リスト
+  ${ingredientListStr}
+
+  ## 宗教的・信条的な食事制限
+  ${religiousRestrictionListStr}
+
+  ---
+
+  以下の条件に必ず従ってください。
+
+  ## 条件
+  - 「宗教的・信条的な食事制限」で食べられない原材料が「原材料リスト」に含まれている場合は、「宗教的・信条的な食事制限」の文字列をそのまま「,」区切りで返してください。
+  - 含まれていない場合は、「null」を返してください。
+  `

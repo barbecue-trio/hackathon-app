@@ -9,3 +9,5 @@ export type {
   GenerateFoodCultureRequest,
   GenerateFoodCultureResponse,
 } from "../../types/api"
+export type { ReligiousRestrictionId } from "../../types/religious"
+export type { AllergenId } from "../../types/allergy"

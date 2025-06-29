@@ -1,21 +1,27 @@
 import { GoogleGenAI, Modality } from "@google/genai"
+import {
+  allergenNameList,
+  allergyNameToIdMap,
+  religiousRestrictionNameList,
+  religiousRestrictionNameToIdMap,
+} from "src/constants"
 import { geminiApiKey } from "../config"
 import {
   MENU_EXTRACTION_PROMPT,
+  createAllergenCheckPrompt,
   createCategoryBatchPrompt,
   createCategoryIndividualPrompt,
   createFoodCulturePrompt,
+  createIngredientsPrompt,
+  createMenuImagePrompt,
+  createReligiousRestrictionCheckPrompt,
 } from "../prompts"
-import type { GeneratedImage, MenuItem } from "../types"
+import type { AllergenId, GeneratedImage, MenuItem, ReligiousRestrictionId } from "../types"
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
 
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"
 const TEXT_MODEL = "gemini-2.5-flash"
-
-const imageModelAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-})
-
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" })
 const textModelAI = new GoogleGenAI({
   apiKey: geminiApiKey || "",
 })
@@ -280,20 +286,7 @@ async function determineCategoryFromMenuName(name: string, nameJp: string): Prom
 
 // メニュー名から画像を生成する関数
 export async function generateMenuImage(menuName: string): Promise<GeneratedImage | null> {
-  const prompt = `
-料理名：${menuName}の画像を生成してください。
-生成する際には以下の条件に従ってください。
-
-## 条件
-- 画像のスタイル: 写実的で食品サンプルやディスプレイ用の料理写真
-- 画像のテーマ: ${menuName}の料理が主役となるように、他の要素は一切含めない
-- 画像の背景: シンプルで料理が引き立つように、背景は白または淡い色にしてください
-- 画像の構図: 料理が中央に配置され、全体がよく見えるように、クローズアップで、余計なものが写り込まないようにしてください
-- **文字、ロゴ、ブランド名、日付、透かし、その他のテキストは一切含めないでください。**
-- **人間、手、食器の一部（料理を盛る皿以外）、その他の物体は含めないでください。**
-- [ID: ${Date.now()}]
-`
-
+  const prompt = createMenuImagePrompt(menuName)
   return await generateImage(prompt)
 }
 
@@ -302,7 +295,7 @@ async function generateImage(prompt: string): Promise<GeneratedImage | null> {
   const MAX_RETRIES = 5
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const res = await imageModelAI.models.generateContent({
+      const res = await ai.models.generateContent({
         model: IMAGE_MODEL,
         contents: prompt,
         config: { responseModalities: [Modality.TEXT, Modality.IMAGE] },
@@ -338,4 +331,94 @@ async function generateImage(prompt: string): Promise<GeneratedImage | null> {
     }
   }
   return null
+}
+
+// メニューの原材料を生成する関数
+export async function generateIngredients(menuName: string): Promise<string[]> {
+  const prompt = createIngredientsPrompt(menuName)
+  const result = await getTextResponse(prompt)
+  if (!result) {
+    throw new Error("Failed to generate ingredients")
+  }
+  return result
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+}
+
+// 原材料にアレルゲンが含まれているかをチェックする関数
+export async function checkAllergen(ingredients: string[]): Promise<AllergenId[]> {
+  const ingredientListStr = ingredients.join(", ")
+  const allergensListStr = allergenNameList.join(", ")
+  const prompt = createAllergenCheckPrompt(ingredientListStr, allergensListStr)
+  const result = await getTextResponse(prompt)
+  // アレルゲン食材が含まれていない場合は空文字列を返す
+  if (result === "null") {
+    return []
+  }
+  if (!result) {
+    throw new Error("Failed to check allergens")
+  }
+
+  const matchedAllergenNameList = result
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+
+  return matchedAllergenNameList
+    .map((name) => allergyNameToIdMap[name])
+    .filter((id): id is AllergenId => typeof id === "number")
+}
+
+// 原材料に宗教的に食べれないものがあるかチェックする関数
+export async function checkReligiousRestriction(
+  ingredients: string[]
+): Promise<ReligiousRestrictionId[]> {
+  const ingredientListStr = ingredients.join(", ")
+  const religiousRestrictionListStr = religiousRestrictionNameList.join(", ")
+  const prompt = createReligiousRestrictionCheckPrompt(
+    ingredientListStr,
+    religiousRestrictionListStr
+  )
+  const result = await getTextResponse(prompt)
+
+  if (result === "null") {
+    return []
+  }
+  if (!result) {
+    throw new Error("Failed to check religious restrictions")
+  }
+
+  const matchedReligiousRestrictionNameList = result
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+
+  return matchedReligiousRestrictionNameList
+    .map((name) => religiousRestrictionNameToIdMap[name])
+    .filter((id): id is ReligiousRestrictionId => typeof id === "number")
+}
+
+// テキストでGemini APIから回答を取得する関数
+async function getTextResponse(prompt: string): Promise<string> {
+  const MAX_RETRIES = 3
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: TEXT_MODEL,
+        contents: prompt,
+      })
+      if (!response || !response.text) {
+        throw new Error("No text response returned from Gemini API")
+      }
+      return response.text
+    } catch (error) {
+      console.warn("Gemini API error", error)
+      // エラーが発生した場合はリトライ
+      if (attempt < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt))
+      }
+    }
+  }
+  throw new Error("Failed to get response from Gemini API after multiple attempts")
 }
