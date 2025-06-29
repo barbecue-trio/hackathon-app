@@ -1,11 +1,13 @@
 // プロジェクトルートの型定義を再エクスポート
-export type { MenuItem, MenuCollection } from "../../types/menu";
-export type { GeneratedImage } from "../../types/image";
+export type { MenuItem, MenuCollection } from "../../types/menu"
+export type { GeneratedImage } from "../../types/image"
 export type {
   ProcessImageRequest,
   ProcessImageResponse,
-} from "../../types/api";
+} from "../../types/api"
 export type {
   GenerateFoodCultureRequest,
   GenerateFoodCultureResponse,
-} from "../../types/api";
+} from "../../types/api"
+export type { ReligiousRestrictionId } from "../../types/religious"
+export type { AllergenId } from "../../types/allergy"

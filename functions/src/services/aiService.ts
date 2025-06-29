@@ -1,21 +1,22 @@
-import type { GeneratedImage, MenuItem } from "../types"
 import { GoogleGenAI, Modality } from "@google/genai"
-import { geminiApiKey } from "../config"
-import { allergenNameList, allergyNameToIdMap } from "../data/allergens"
 import {
+  allergenNameList,
+  allergyNameToIdMap,
   religiousRestrictionNameList,
   religiousRestrictionNameToIdMap,
-} from "../data/religiousRestrictions"
+} from "src/constants"
+import { geminiApiKey } from "../config"
 import {
   MENU_EXTRACTION_PROMPT,
+  createAllergenCheckPrompt,
   createCategoryBatchPrompt,
   createCategoryIndividualPrompt,
   createFoodCulturePrompt,
-  createMenuImagePrompt,
   createIngredientsPrompt,
-  createAllergenCheckPrompt,
+  createMenuImagePrompt,
   createReligiousRestrictionCheckPrompt,
 } from "../prompts"
+import type { AllergenId, GeneratedImage, MenuItem, ReligiousRestrictionId } from "../types"
 import { extractMenuNamesFromText, fetchImageAsBase64 } from "./imageService"
 
 const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"
@@ -346,7 +347,7 @@ export async function generateIngredients(menuName: string): Promise<string[]> {
 }
 
 // 原材料にアレルゲンが含まれているかをチェックする関数
-export async function checkAllergen(ingredients: string[]): Promise<string[]> {
+export async function checkAllergen(ingredients: string[]): Promise<AllergenId[]> {
   const ingredientListStr = ingredients.join(", ")
   const allergensListStr = allergenNameList.join(", ")
   const prompt = createAllergenCheckPrompt(ingredientListStr, allergensListStr)
@@ -366,15 +367,19 @@ export async function checkAllergen(ingredients: string[]): Promise<string[]> {
 
   return matchedAllergenNameList
     .map((name) => allergyNameToIdMap[name])
-    .filter((id): id is number => typeof id === "number")
-    .map((id) => id.toString())
+    .filter((id): id is AllergenId => typeof id === "number")
 }
 
 // 原材料に宗教的に食べれないものがあるかチェックする関数
-export async function checkReligiousRestriction(ingredients: string[]): Promise<string[]> {
+export async function checkReligiousRestriction(
+  ingredients: string[]
+): Promise<ReligiousRestrictionId[]> {
   const ingredientListStr = ingredients.join(", ")
   const religiousRestrictionListStr = religiousRestrictionNameList.join(", ")
-  const prompt = createReligiousRestrictionCheckPrompt(ingredientListStr, religiousRestrictionListStr)
+  const prompt = createReligiousRestrictionCheckPrompt(
+    ingredientListStr,
+    religiousRestrictionListStr
+  )
   const result = await getTextResponse(prompt)
 
   if (result === "null") {
@@ -391,8 +396,7 @@ export async function checkReligiousRestriction(ingredients: string[]): Promise<
 
   return matchedReligiousRestrictionNameList
     .map((name) => religiousRestrictionNameToIdMap[name])
-    .filter((id): id is number => typeof id === "number")
-    .map((id) => id.toString())
+    .filter((id): id is ReligiousRestrictionId => typeof id === "number")
 }
 
 // テキストでGemini APIから回答を取得する関数

@@ -1,11 +1,11 @@
 import type { Request } from "firebase-functions/v2/https"
+import type { MenuCollection } from "src/types"
 import {
   checkAllergen,
   checkReligiousRestriction,
   generateIngredients,
 } from "../services/aiService"
 import { getMenuCollection, updateMenuCollection } from "../services/firestoreService"
-import type { MenuCollection } from "../types"
 
 export async function handleCheckDietaryRestrictions(
   request: Request,
