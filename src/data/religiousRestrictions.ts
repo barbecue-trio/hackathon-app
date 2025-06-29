@@ -5,4 +5,4 @@ export {
   type ReligiousRestriction,
   religiousRestrictionIdMap,
   religiousRestrictionList,
-} from "@/types"
+} from "../../types"
