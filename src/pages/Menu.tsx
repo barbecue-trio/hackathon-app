@@ -1,18 +1,18 @@
 import { Box, Typography } from "@mui/material"
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useLocation } from "react-router-dom"
+import type { MenuItem as MenuItemType } from "../../types"
+import { religiousRestrictionNameToIdMap } from "../../types/religious"
 // Vite static asset import
 import menuItemImg from "../assets/images/menu-item-image.png"
 import CheckItem from "../components/CheckItem"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 import MenuItem from "../components/MenuItem"
-import { getMenuCollectionId } from "../utils/localStorage"
-import { getMenuCollection } from "../services/firestoreService"
-import type { MenuItem as MenuItemType } from "../../types"
 // 統合型定義システムから宗教的制約情報をインポート
 import { religiousRestrictionList } from "../data/religiousRestrictions"
-import { religiousRestrictionNameToIdMap } from "../../types/religious"
+import { getMenuCollection } from "../services/firestoreService"
+import { getMenuCollectionId } from "../utils/localStorage"
 
 interface LocationState {
   uploadedImage?: string
@@ -30,12 +30,12 @@ function Menu() {
   // Dietary Restrictions state - 宗教的制約のみ
   const [dietaryRestrictions, setDietaryRestrictions] = useState<Record<string, boolean>>(() => {
     const initialState: Record<string, boolean> = {}
-    
+
     // 宗教的制約項目を追加
-    religiousRestrictionList.forEach(restriction => {
+    for (const restriction of religiousRestrictionList) {
       initialState[restriction.name] = false
-    })
-    
+    }
+
     return initialState
   })
 
@@ -56,9 +56,9 @@ function Menu() {
     const fetchMenuData = async () => {
       try {
         setIsLoadingMenu(true)
-        
+
         // ローカルストレージからメニューコレクションIDを取得
-        let documentId = getMenuCollectionId() || ""
+        const documentId = getMenuCollectionId() || ""
 
         console.log("documentId:", documentId)
 
@@ -79,7 +79,6 @@ function Menu() {
           console.warn("メニューアイテムが見つかりません")
           setMenuItems([])
         }
-
       } catch (error) {
         console.error("メニューデータの取得に失敗しました:", error)
         setMenuItems([])
@@ -97,7 +96,7 @@ function Menu() {
     const selectedRestrictionIds = Object.entries(dietaryRestrictions)
       .filter(([_, checked]) => checked)
       .map(([restrictionName, _]) => religiousRestrictionNameToIdMap[restrictionName])
-      .filter(id => id !== undefined)
+      .filter((id) => id !== undefined)
 
     console.log("選択された宗教的制約ID:", selectedRestrictionIds)
 
@@ -107,8 +106,8 @@ function Menu() {
     }
 
     // 選択された宗教的制約を含むメニューを除外
-    const filtered = menuItems.filter(item => {
-      const hasRestrictedIngredients = item.dietary_restriction_ids.some(id => 
+    const filtered = menuItems.filter((item) => {
+      const hasRestrictedIngredients = item.dietary_restriction_ids.some((id) =>
         selectedRestrictionIds.includes(id)
       )
       return !hasRestrictedIngredients
@@ -349,9 +348,9 @@ function Menu() {
                 </Typography>
               </Box>
             ) : filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item, index) => (
+              filteredMenuItems.map((item) => (
                 <MenuItem
-                  key={item.name + index}
+                  key={item.name}
                   title={item.name}
                   ingredients={item.ingredients.join(", ")}
                   imageSrc={menuItemImg}
