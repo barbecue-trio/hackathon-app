@@ -7,8 +7,12 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/types": ["../types"]
+    }
   },
   "compileOnSave": true,
-  "include": ["src"]
+  "include": ["src", "../types"]
 }

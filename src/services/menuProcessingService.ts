@@ -1,8 +1,4 @@
-interface MenuProcessingResponse {
-  success: boolean
-  documentId: string
-  menuCount: number
-}
+import type { MenuProcessingResponse } from "@/types"
 
 export const processMenuImage = async (storageId: string): Promise<MenuProcessingResponse> => {
   const apiEndpoint = import.meta.env.VITE_MENU_PROCESSING_API_URL || ""
