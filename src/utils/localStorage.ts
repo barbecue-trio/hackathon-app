@@ -1,6 +1,10 @@
+import type { AllergenId } from "types/allergy"
+import type { ReligiousRestrictionId } from "types/religious"
+
 // Local Storage Keys
 export const LOCAL_STORAGE_KEYS = {
   MENU_COLLECTION_ID: "menuCollectionId",
+  DIETARY_RESTRICTIONS: "dietaryRestrictions",
 } as const
 
 // Menu Collection ID関連の関数
@@ -27,4 +31,26 @@ export const getLocalStorageItem = (key: string): string | null => {
 
 export const removeLocalStorageItem = (key: string): void => {
   localStorage.removeItem(key)
+}
+
+// 食事制限関連の関数
+type UserDietaryRestrictions = {
+  allergies: AllergenId[]
+  religious: ReligiousRestrictionId[]
+  other: string[]
+}
+
+export const saveDietaryRestrictions = (dietaryRestrictions: UserDietaryRestrictions): void => {
+  setLocalStorageItem(LOCAL_STORAGE_KEYS.DIETARY_RESTRICTIONS, JSON.stringify(dietaryRestrictions))
+}
+
+export const getDietaryRestrictions = (): UserDietaryRestrictions => {
+  const stored = getLocalStorageItem(LOCAL_STORAGE_KEYS.DIETARY_RESTRICTIONS)
+  return stored
+    ? JSON.parse(stored)
+    : {
+        allergies: [],
+        religious: [],
+        other: [],
+      }
 }

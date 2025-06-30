@@ -1,3 +1,8 @@
+import { allergyList } from "@/data/allergens"
+import { religiousRestrictionList } from "@/data/religiousRestrictions"
+import { getInitDietaryRestrictions } from "@/services/dietaryRestrictionService"
+import type { AllergenId, ReligiousRestrictionId } from "@/types"
+import { saveDietaryRestrictions } from "@/utils/localStorage"
 import { Box, Typography } from "@mui/material"
 import { useState } from "react"
 import Button from "../components/Button"
@@ -5,43 +10,38 @@ import CheckItem from "../components/CheckItem"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 
+const otherKeys = ["Vegan", "Gluten-free", "Low-carb"]
+
 function DietaryRestrictions() {
-  const [allergies, setAllergies] = useState<Record<string, boolean>>({
-    "Crustacean Shellfish": false,
-    "Molluscan shellfish": false,
-    Fish: false,
-    Wheat: false,
-    Eggs: false,
-    Milk: false,
-    Peanuts: false,
-    "Tree nuts": false,
-    Soybeans: false,
-    Sesame: false,
+  const [allergies, setAllergies] = useState<Record<AllergenId, boolean>>(
+    () => getInitDietaryRestrictions().allergies
+  )
+
+  const [religiousRestrictions, setReligiousRestrictions] = useState<
+    Record<ReligiousRestrictionId, boolean>
+  >(() => getInitDietaryRestrictions().religious)
+  const [otherRestrictions, setOtherRestrictions] = useState<Record<string, boolean>>(() => {
+    const initOther = getInitDietaryRestrictions().other
+    return otherKeys.reduce(
+      (acc, key) => {
+        acc[key] = initOther.includes(key)
+        return acc
+      },
+      {} as Record<string, boolean>
+    )
   })
 
-  const [religiousRestrictions, setReligiousRestrictions] = useState<Record<string, boolean>>({
-    Halal: false,
-    Kosher: false,
-    Vegetarian: false,
-  })
-
-  const [otherRestrictions, setOtherRestrictions] = useState<Record<string, boolean>>({
-    Vegan: false,
-    "Gluten-free": false,
-    "Low-carb": false,
-  })
-
-  const handleAllergyChange = (allergen: string, checked: boolean) => {
+  const handleAllergyChange = (id: AllergenId) => {
     setAllergies((prev) => ({
       ...prev,
-      [allergen]: checked,
+      [id]: !prev[id],
     }))
   }
 
-  const handleReligiousChange = (restriction: string, checked: boolean) => {
+  const handleReligiousChange = (id: ReligiousRestrictionId) => {
     setReligiousRestrictions((prev) => ({
       ...prev,
-      [restriction]: checked,
+      [id]: !prev[id],
     }))
   }
 
@@ -53,10 +53,15 @@ function DietaryRestrictions() {
   }
 
   const handleSave = () => {
-    // TODO: Save dietary restrictions
-    console.log("Allergies:", allergies)
-    console.log("Religious Restrictions:", religiousRestrictions)
-    console.log("Other Restrictions:", otherRestrictions)
+    saveDietaryRestrictions({
+      allergies: Object.entries(allergies)
+        .filter(([_, checked]) => checked)
+        .map(([id]) => Number(id)) as AllergenId[],
+      religious: Object.entries(religiousRestrictions)
+        .filter(([_, checked]) => checked)
+        .map(([id]) => Number(id)) as ReligiousRestrictionId[],
+      other: Object.keys(otherRestrictions).filter((key) => otherRestrictions[key]),
+    })
   }
 
   return (
@@ -130,12 +135,12 @@ function DietaryRestrictions() {
               width: "100%",
             }}
           >
-            {Object.entries(allergies).map(([allergen, checked]) => (
+            {allergyList.map((allergen) => (
               <CheckItem
-                key={allergen}
-                label={allergen}
-                checked={checked}
-                onChange={(newChecked) => handleAllergyChange(allergen, newChecked)}
+                key={allergen.id}
+                label={allergen.name}
+                checked={allergies[allergen.id] || false}
+                onChange={() => handleAllergyChange(allergen.id)}
               />
             ))}
           </Box>
@@ -203,12 +208,12 @@ function DietaryRestrictions() {
               width: "100%",
             }}
           >
-            {Object.entries(religiousRestrictions).map(([restriction, checked]) => (
+            {religiousRestrictionList.map((restriction) => (
               <CheckItem
-                key={restriction}
-                label={restriction}
-                checked={checked}
-                onChange={(newChecked) => handleReligiousChange(restriction, newChecked)}
+                key={restriction.id}
+                label={restriction.name}
+                checked={religiousRestrictions[restriction.id] || false}
+                onChange={() => handleReligiousChange(restriction.id)}
               />
             ))}
           </Box>

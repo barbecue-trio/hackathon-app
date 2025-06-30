@@ -55,7 +55,9 @@ export async function handleCheckDietaryRestrictions(
     }
     await updateMenuCollection(documentId, updatedMenuCollection)
 
-    response.sendStatus(200)
+    response.status(200).json({
+      success: true,
+    })
   } catch (error) {
     console.error("食事制限チェックでエラーが発生しました:", error)
     response.status(500).json({
