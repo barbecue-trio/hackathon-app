@@ -348,14 +348,19 @@ function Menu() {
                 </Typography>
               </Box>
             ) : filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item) => (
-                <MenuItem
-                  key={item.name}
-                  title={item.name}
-                  ingredients={item.ingredients.join(", ")}
-                  imageSrc={menuItemImg}
-                />
-              ))
+              filteredMenuItems.map((item) => {
+                // 元のメニュー配列でのインデックスを取得
+                const originalIndex = menuItems.findIndex((menuItem) => menuItem.name === item.name)
+                return (
+                  <MenuItem
+                    key={item.name}
+                    title={item.name}
+                    ingredients={item.ingredients.join(", ")}
+                    imageSrc={menuItemImg}
+                    index={originalIndex}
+                  />
+                )
+              })
             ) : menuItems.length > 0 ? (
               <Box
                 sx={{

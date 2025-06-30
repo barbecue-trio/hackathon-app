@@ -1,17 +1,27 @@
 import { Box, Typography } from "@mui/material"
 import { useNavigate } from "react-router-dom"
+import { getMenuCollectionId } from "../utils/localStorage"
 
 interface MenuItemProps {
   title: string
   ingredients: string
   imageSrc?: string
+  index: number
 }
 
-function MenuItem({ title, ingredients, imageSrc }: MenuItemProps) {
+function MenuItem({ title, ingredients, imageSrc, index }: MenuItemProps) {
   const navigate = useNavigate()
 
   const handleClick = () => {
-    navigate("/menu-detail")
+    const documentId = getMenuCollectionId()
+    if (!documentId) return
+
+    const queryParams = new URLSearchParams({
+      documentId: documentId,
+      index: index.toString(),
+    })
+
+    navigate(`/menu-detail?${queryParams.toString()}`)
   }
 
   return (
