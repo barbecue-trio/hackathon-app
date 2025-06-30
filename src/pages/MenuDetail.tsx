@@ -1,62 +1,59 @@
-import { Box, Skeleton, Typography } from "@mui/material";
-import { getDownloadURL, ref } from "firebase/storage";
-import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import type { MenuItem as MenuItemType } from "../../types";
-import ramanDishMain from "../assets/images/ramen-dish-main.png";
-import noodles from "../assets/noodles.jpeg";
-import pot from "../assets/pot.jpeg";
-import sashimi from "../assets/sashimi.jpeg";
-import sushi from "../assets/sushi.jpeg";
-import DietaryItem from "../components/DietaryItem";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import { allergyIdMap } from "../data/allergens";
-import { religiousRestrictionList } from "../data/religiousRestrictions";
-import { storage } from "../firebase";
-import { getMenuCollection } from "../services/firestoreService";
-import { getMenuCollectionId } from "../utils/localStorage";
-const FALLBACK_IMAGE = ramanDishMain;
-const STORAGE_BASE_PATH =
-  "gs://barbecue-trio.firebasestorage.app/menuItemImage";
+import { Box, Skeleton, Typography } from "@mui/material"
+import { getDownloadURL, ref } from "firebase/storage"
+import { useCallback, useEffect, useState } from "react"
+import { useSearchParams } from "react-router-dom"
+import type { MenuItem as MenuItemType } from "../../types"
+import ramanDishMain from "../assets/images/ramen-dish-main.png"
+import noodles from "../assets/noodles.jpeg"
+import pot from "../assets/pot.jpeg"
+import sashimi from "../assets/sashimi.jpeg"
+import sushi from "../assets/sushi.jpeg"
+import DietaryItem from "../components/DietaryItem"
+import Footer from "../components/Footer"
+import Header from "../components/Header"
+import { allergyIdMap } from "../data/allergens"
+import { religiousRestrictionList } from "../data/religiousRestrictions"
+import { storage } from "../firebase"
+import { getMenuCollection } from "../services/firestoreService"
+import { getMenuCollectionId } from "../utils/localStorage"
+const FALLBACK_IMAGE = ramanDishMain
+const STORAGE_BASE_PATH = "gs://barbecue-trio.firebasestorage.app/menuItemImage"
 
 const CATEGORY_IMAGES = {
   1: noodles,
   2: pot,
   3: sashimi,
   4: sushi,
-} as const;
+} as const
 
 // Utility functions
 const buildImageUrl = async (imageId: string): Promise<string> => {
-  if (!imageId) return FALLBACK_IMAGE;
+  if (!imageId) return FALLBACK_IMAGE
 
   try {
-    const gsReference = ref(storage, `${STORAGE_BASE_PATH}/${imageId}`);
-    const url = await getDownloadURL(gsReference);
-    return url;
+    const gsReference = ref(storage, `${STORAGE_BASE_PATH}/${imageId}`)
+    const url = await getDownloadURL(gsReference)
+    return url
   } catch (error) {
-    console.error("画像URL取得エラー:", error);
-    return FALLBACK_IMAGE;
+    console.error("画像URL取得エラー:", error)
+    return FALLBACK_IMAGE
   }
-};
+}
 
 const getCategoryImage = (categoryId: number): string | null => {
-  return CATEGORY_IMAGES[categoryId as keyof typeof CATEGORY_IMAGES] || null;
-};
+  return CATEGORY_IMAGES[categoryId as keyof typeof CATEGORY_IMAGES] || null
+}
 
 const getAllergenNames = (allergyIds: number[]): string[] => {
-  return allergyIds
-    .map((id) => allergyIdMap[id])
-    .filter((name) => name !== undefined);
-};
+  return allergyIds.map((id) => allergyIdMap[id]).filter((name) => name !== undefined)
+}
 
 const getDietaryRestrictionItems = (dietaryRestrictionIds: number[]) => {
   return religiousRestrictionList.map((restriction) => ({
     label: restriction.name,
     isSelected: dietaryRestrictionIds.includes(restriction.id),
-  }));
-};
+  }))
+}
 
 // Check if required fields are empty
 const isRequiredFieldsEmpty = (menuItem: MenuItemType): boolean => {
@@ -68,8 +65,8 @@ const isRequiredFieldsEmpty = (menuItem: MenuItemType): boolean => {
     !menuItem.food_culture ||
     !menuItem.ingredients ||
     menuItem.ingredients.length === 0
-  );
-};
+  )
+}
 
 // Component styles
 const styles = {
@@ -164,87 +161,84 @@ const styles = {
     gap: "8px",
     width: "100%",
   },
-};
+}
 
 function MenuDetail() {
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams()
 
-  const [menuItem, setMenuItem] = useState<MenuItemType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [imageUrl, setImageUrl] = useState<string>(FALLBACK_IMAGE);
+  const [menuItem, setMenuItem] = useState<MenuItemType | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [imageUrl, setImageUrl] = useState<string>(FALLBACK_IMAGE)
 
   // Fetch image URL
   const fetchImageUrl = useCallback(async (imageId: string) => {
     if (!imageId) {
-      setImageUrl(FALLBACK_IMAGE);
-      return;
+      setImageUrl(FALLBACK_IMAGE)
+      return
     }
 
     try {
-      const url = await buildImageUrl(imageId);
-      setImageUrl(url);
+      const url = await buildImageUrl(imageId)
+      setImageUrl(url)
     } catch (error) {
-      console.error("画像URL取得エラー:", error);
-      setImageUrl(FALLBACK_IMAGE);
+      console.error("画像URL取得エラー:", error)
+      setImageUrl(FALLBACK_IMAGE)
     }
-  }, []);
+  }, [])
 
   // Fetch menu detail data
   useEffect(() => {
     const fetchMenuDetail = async () => {
       try {
-        setIsLoading(true);
+        setIsLoading(true)
 
-        const documentId =
-          searchParams.get("documentId") || getMenuCollectionId() || "";
-        const indexStr = searchParams.get("index");
-        const index = indexStr ? Number.parseInt(indexStr, 10) : -1;
+        const documentId = searchParams.get("documentId") || getMenuCollectionId() || ""
+        const indexStr = searchParams.get("index")
+        const index = indexStr ? Number.parseInt(indexStr, 10) : -1
 
         if (!documentId) {
-          console.warn("メニューコレクションIDが見つかりません");
-          setMenuItem(null);
-          return;
+          console.warn("メニューコレクションIDが見つかりません")
+          setMenuItem(null)
+          return
         }
 
         if (index === -1) {
-          console.warn("メニューアイテムのインデックスが見つかりません");
-          setMenuItem(null);
-          return;
+          console.warn("メニューアイテムのインデックスが見つかりません")
+          setMenuItem(null)
+          return
         }
 
-        const menuCollection = await getMenuCollection(documentId);
+        const menuCollection = await getMenuCollection(documentId)
 
         if (menuCollection?.menus?.length > 0) {
           if (index >= 0 && index < menuCollection.menus.length) {
-            const foundMenuItem = menuCollection.menus[index];
-            setMenuItem(foundMenuItem);
-            await fetchImageUrl(foundMenuItem.image_id);
+            const foundMenuItem = menuCollection.menus[index]
+            setMenuItem(foundMenuItem)
+            await fetchImageUrl(foundMenuItem.image_id)
           } else {
             console.warn(
               `指定されたインデックス ${index} のメニューアイテムが見つかりません。利用可能なインデックス: 0-${
                 menuCollection.menus.length - 1
               }`
-            );
-            setMenuItem(null);
+            )
+            setMenuItem(null)
           }
         } else {
-          console.warn("メニューアイテムが見つかりません");
-          setMenuItem(null);
+          console.warn("メニューアイテムが見つかりません")
+          setMenuItem(null)
         }
       } catch (error) {
-        console.error("メニュー詳細データの取得に失敗しました:", error);
-        setMenuItem(null);
+        console.error("メニュー詳細データの取得に失敗しました:", error)
+        setMenuItem(null)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchMenuDetail();
-  }, [searchParams, fetchImageUrl]);
+    fetchMenuDetail()
+  }, [searchParams, fetchImageUrl])
 
-  const categoryImage = menuItem
-    ? getCategoryImage(menuItem.category_id)
-    : null;
+  const categoryImage = menuItem ? getCategoryImage(menuItem.category_id) : null
 
   // Render loading state
   if (isLoading) {
@@ -258,7 +252,7 @@ function MenuDetail() {
           <Footer />
         </Box>
       </Box>
-    );
+    )
   }
 
   // Render error state
@@ -273,11 +267,11 @@ function MenuDetail() {
           <Footer />
         </Box>
       </Box>
-    );
+    )
   }
 
   // Check if required fields are empty
-  const showSkeleton = isRequiredFieldsEmpty(menuItem);
+  const showSkeleton = isRequiredFieldsEmpty(menuItem)
 
   return (
     <Box className="app-container">
@@ -331,8 +325,7 @@ function MenuDetail() {
                 <Skeleton variant="text" sx={styles.body} />
               ) : (
                 <Typography sx={styles.body}>
-                  {menuItem.ingredients.join(", ") ||
-                    "材料情報が利用できません"}
+                  {menuItem.ingredients.join(", ") || "材料情報が利用できません"}
                 </Typography>
               )}
             </Box>
@@ -359,9 +352,7 @@ function MenuDetail() {
             </Box>
             <Box sx={styles.sectionContent}>
               <Box sx={styles.dietaryItemsContainer}>
-                {getDietaryRestrictionItems(
-                  menuItem.dietary_restriction_ids
-                ).map((item, index) => (
+                {getDietaryRestrictionItems(menuItem.dietary_restriction_ids).map((item, index) => (
                   <DietaryItem
                     key={`${item.label}-${index}`}
                     label={item.label}
@@ -390,7 +381,7 @@ function MenuDetail() {
         <Footer />
       </Box>
     </Box>
-  );
+  )
 }
 
-export default MenuDetail;
+export default MenuDetail
