@@ -40,7 +40,9 @@ export async function handleGenerateMenuImage(request: Request, response: any): 
     }
     await updateMenuCollection(documentId, updatedMenuCollection)
 
-    response.sendStatus(200)
+    response.status(200).json({
+      success: true,
+    })
   } catch (error) {
     console.error(error)
     response.status(500).json({ success: false, error: "Internal Server Error" })
