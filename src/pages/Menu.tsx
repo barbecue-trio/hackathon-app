@@ -88,7 +88,7 @@ function Menu() {
     }
 
     fetchMenuData()
-  }, [state?.menuCollectionId])
+  }, [])
 
   // チェックされた宗教的制約に基づいてメニューをフィルタリング
   const filteredMenuItems = useMemo(() => {
