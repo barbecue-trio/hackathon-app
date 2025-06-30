@@ -7,6 +7,7 @@ export const generateFoodCulture = onRequest(
     cors: true,
     region: "asia-northeast1",
     memory: "512MiB",
+    timeoutSeconds: 120,
   },
   handleGenerateFoodCulture
 )
