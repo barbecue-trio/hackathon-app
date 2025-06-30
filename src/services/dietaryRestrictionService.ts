@@ -42,5 +42,6 @@ export function getInitDietaryRestrictions() {
   return {
     allergies,
     religious,
+    other: storage.other || [],
   }
 }

@@ -10,6 +10,8 @@ import CheckItem from "../components/CheckItem"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 
+const otherKeys = ["Vegan", "Gluten-free", "Low-carb"]
+
 function DietaryRestrictions() {
   const [allergies, setAllergies] = useState<Record<AllergenId, boolean>>(
     () => getInitDietaryRestrictions().allergies
@@ -18,11 +20,15 @@ function DietaryRestrictions() {
   const [religiousRestrictions, setReligiousRestrictions] = useState<
     Record<ReligiousRestrictionId, boolean>
   >(() => getInitDietaryRestrictions().religious)
-
-  const [otherRestrictions, setOtherRestrictions] = useState<Record<string, boolean>>({
-    Vegan: false,
-    "Gluten-free": false,
-    "Low-carb": false,
+  const [otherRestrictions, setOtherRestrictions] = useState<Record<string, boolean>>(() => {
+    const initOther = getInitDietaryRestrictions().other
+    return otherKeys.reduce(
+      (acc, key) => {
+        acc[key] = initOther.includes(key)
+        return acc
+      },
+      {} as Record<string, boolean>
+    )
   })
 
   const handleAllergyChange = (id: AllergenId) => {
