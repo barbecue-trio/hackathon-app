@@ -1,4 +1,5 @@
-import CheckIcon from "@mui/icons-material/Check"
+import CloseIcon from "@mui/icons-material/Close"
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked"
 import { Box, Typography } from "@mui/material"
 import type React from "react"
 
@@ -64,8 +65,16 @@ const DietaryItem: React.FC<DietaryItemProps> = ({ label, isSelected = false, on
           height: "24px",
         }}
       >
-        {isSelected && (
-          <CheckIcon
+        {isSelected ? (
+          <CloseIcon
+            sx={{
+              width: "24px",
+              height: "24px",
+              color: "#121217",
+            }}
+          />
+        ) : (
+          <RadioButtonUncheckedIcon
             sx={{
               width: "24px",
               height: "24px",

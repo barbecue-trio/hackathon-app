@@ -35,7 +35,7 @@ const buildImageUrl = async (imageId: string): Promise<string> => {
     const url = await getDownloadURL(gsReference)
     return url
   } catch (error) {
-    console.error("画像URL取得エラー:", error)
+    console.error("Image URL retrieval error:", error)
     return FALLBACK_IMAGE
   }
 }
@@ -55,13 +55,12 @@ const getDietaryRestrictionItems = (dietaryRestrictionIds: number[]) => {
   }))
 }
 
-// Check if required fields are empty
-const isRequiredFieldsEmpty = (menuItem: MenuItemType): boolean => {
+// Check if required fields are empty (except image_id)
+const showSkeletonExceptImage = (menuItem: MenuItemType): boolean => {
   return (
     !menuItem.name_jp ||
     !menuItem.category_id ||
     !menuItem.name ||
-    !menuItem.image_id ||
     !menuItem.food_culture ||
     !menuItem.ingredients ||
     menuItem.ingredients.length === 0
@@ -181,7 +180,7 @@ function MenuDetail() {
       const url = await buildImageUrl(imageId)
       setImageUrl(url)
     } catch (error) {
-      console.error("画像URL取得エラー:", error)
+      console.error("Image URL retrieval error:", error)
       setImageUrl(FALLBACK_IMAGE)
     }
   }, [])
@@ -197,13 +196,13 @@ function MenuDetail() {
         const index = indexStr ? Number.parseInt(indexStr, 10) : -1
 
         if (!documentId) {
-          console.warn("メニューコレクションIDが見つかりません")
+          console.warn("Menu collection ID not found")
           setMenuItem(null)
           return
         }
 
         if (index === -1) {
-          console.warn("メニューアイテムのインデックスが見つかりません")
+          console.warn("Menu item index not found")
           setMenuItem(null)
           return
         }
@@ -217,18 +216,18 @@ function MenuDetail() {
             await fetchImageUrl(foundMenuItem.image_id)
           } else {
             console.warn(
-              `指定されたインデックス ${index} のメニューアイテムが見つかりません。利用可能なインデックス: 0-${
+              `Menu item with specified index ${index} not found. Available indices: 0-${
                 menuCollection.menus.length - 1
               }`
             )
             setMenuItem(null)
           }
         } else {
-          console.warn("メニューアイテムが見つかりません")
+          console.warn("Menu item not found")
           setMenuItem(null)
         }
       } catch (error) {
-        console.error("メニュー詳細データの取得に失敗しました:", error)
+        console.error("Failed to fetch menu detail data:", error)
         setMenuItem(null)
       } finally {
         setIsLoading(false)
@@ -240,14 +239,17 @@ function MenuDetail() {
 
   const categoryImage = menuItem ? getCategoryImage(menuItem.category_id) : null
 
+  // showSkeleton is true only when image_id is empty or menuItem is null
+  const showSkeleton = !menuItem || !menuItem.image_id
+
   // Render loading state
   if (isLoading) {
     return (
       <Box className="app-container">
         <Box className="page-container">
           <Box className="main-content with-footer scrollable">
-            <Header title="読み込み中..." />
-            <Typography sx={styles.body}>読み込み中...</Typography>
+            <Header title="Loading..." />
+            <Typography sx={styles.body}>Loading...</Typography>
           </Box>
           <Footer />
         </Box>
@@ -261,17 +263,14 @@ function MenuDetail() {
       <Box className="app-container">
         <Box className="page-container">
           <Box className="main-content with-footer scrollable">
-            <Header title="メニューが見つかりません" />
-            <Typography sx={styles.body}>メニューが見つかりません</Typography>
+            <Header title="Menu Not Found" />
+            <Typography sx={styles.body}>Menu not found</Typography>
           </Box>
           <Footer />
         </Box>
       </Box>
     )
   }
-
-  // Check if required fields are empty
-  const showSkeleton = isRequiredFieldsEmpty(menuItem)
 
   return (
     <Box className="app-container">
@@ -309,7 +308,7 @@ function MenuDetail() {
                 <Skeleton variant="text" sx={styles.body} />
               ) : (
                 <Typography sx={styles.body}>
-                  {menuItem.food_culture || "説明が利用できません"}
+                  {menuItem.food_culture || "Description not available"}
                 </Typography>
               )}
             </Box>
@@ -325,7 +324,7 @@ function MenuDetail() {
                 <Skeleton variant="text" sx={styles.body} />
               ) : (
                 <Typography sx={styles.body}>
-                  {menuItem.ingredients.join(", ") || "材料情報が利用できません"}
+                  {menuItem.ingredients.join(", ") || "Ingredient information not available"}
                 </Typography>
               )}
             </Box>
@@ -337,11 +336,15 @@ function MenuDetail() {
               <Typography sx={styles.subtitle}>Allergens</Typography>
             </Box>
             <Box sx={styles.sectionContent}>
-              <Typography sx={styles.body}>
-                {menuItem.allergy_ids && menuItem.allergy_ids.length > 0
-                  ? getAllergenNames(menuItem.allergy_ids).join(", ")
-                  : "アレルゲン情報なし"}
-              </Typography>
+              {showSkeleton ? (
+                <Skeleton variant="text" sx={styles.body} />
+              ) : (
+                <Typography sx={styles.body}>
+                  {menuItem.allergy_ids && menuItem.allergy_ids.length > 0
+                    ? getAllergenNames(menuItem.allergy_ids).join(", ")
+                    : "No allergen information"}
+                </Typography>
+              )}
             </Box>
           </Box>
 
