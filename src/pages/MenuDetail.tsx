@@ -1,5 +1,6 @@
-import { Box, Typography, Skeleton } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
+import { Box, Skeleton, Typography } from "@mui/material";
+import { getDownloadURL, ref } from "firebase/storage";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { MenuItem as MenuItemType } from "../../types";
 import ramanDishMain from "../assets/images/ramen-dish-main.png";
@@ -10,12 +11,11 @@ import sushi from "../assets/sushi.jpeg";
 import DietaryItem from "../components/DietaryItem";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import { getMenuCollection } from "../services/firestoreService";
-import { getMenuCollectionId } from "../utils/localStorage";
-import { ref, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase";
 import { allergyIdMap } from "../data/allergens";
 import { religiousRestrictionList } from "../data/religiousRestrictions";
+import { storage } from "../firebase";
+import { getMenuCollection } from "../services/firestoreService";
+import { getMenuCollectionId } from "../utils/localStorage";
 const FALLBACK_IMAGE = ramanDishMain;
 const STORAGE_BASE_PATH =
   "gs://barbecue-trio.firebasestorage.app/menuItemImage";
