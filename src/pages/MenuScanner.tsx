@@ -31,43 +31,43 @@ function MenuScanner() {
     console.log("File type:", file.type)
 
     setIsUploading(true)
-    setUploadStatus("画像をアップロード中...")
+    setUploadStatus("Uploading image...")
     setUploadProgress(0)
 
     try {
-      // Firebase Cloud Storageにアップロード（進捗コールバック付き）
+      // Upload to Firebase Cloud Storage with progress callback
       const result = await uploadImageToStorage(file, "menuImages", (progress: number) => {
         setUploadProgress(progress)
         if (progress < 25) {
-          setUploadStatus("アップロード準備中...")
+          setUploadStatus("Preparing upload...")
         } else if (progress < 75) {
-          setUploadStatus("画像をアップロード中...")
+          setUploadStatus("Uploading image...")
         } else if (progress < 100) {
-          setUploadStatus("処理を完了中...")
+          setUploadStatus("Completing process...")
         } else {
-          setUploadStatus("アップロード完了!")
+          setUploadStatus("Upload complete!")
         }
       })
 
-      console.log("アップロード成功:", result)
-      console.log("ファイルサイズ:", (result.fileSize / 1024 / 1024).toFixed(2), "MB")
+      console.log("Upload successful:", result)
+      console.log("File size:", (result.fileSize / 1024 / 1024).toFixed(2), "MB")
       console.log("Content Type:", result.contentType)
 
-      // メニュー画像処理APIを呼び出し
-      setUploadStatus("メニューを解析中...")
+      // Call menu image processing API
+      setUploadStatus("Analyzing menu...")
       setUploadProgress(100)
 
       try {
         const processResult = await processMenuImage(result.filePath)
-        console.log("メニュー処理結果:", processResult)
+        console.log("Menu processing result:", processResult)
 
-        // documentIdをローカルストレージに保存
+        // Save documentId to localStorage
         if (processResult.success && processResult.documentId) {
           saveMenuCollectionId(processResult.documentId)
           console.log("menuCollectionId saved:", processResult.documentId)
         }
 
-        // Menu Analysisページに遷移
+        // Navigate to Menu Analysis page
         navigate("/menu", {
           state: {
             uploadedImage: result.downloadURL,
@@ -80,7 +80,7 @@ function MenuScanner() {
         })
       } catch (apiError) {
         console.error("Menu processing API error:", apiError)
-        // API エラーの場合でもページ遷移は継続（フォールバック）
+        // Continue page navigation even in case of API error (fallback)
         setIsUploading(false)
         setUploadStatus("")
         setUploadProgress(0)
@@ -93,8 +93,8 @@ function MenuScanner() {
           },
         })
 
-        // エラーメッセージを表示
-        alert("メニューの解析に失敗しました。手動でメニューを確認してください。")
+        // Display error message
+        alert("Menu analysis failed. Please check the menu manually.")
       }
     } catch (error) {
       console.error("Upload error:", error)
@@ -102,15 +102,15 @@ function MenuScanner() {
       setUploadStatus("")
       setUploadProgress(0)
 
-      // エラーメッセージを表示
+      // Display error message
       if (error instanceof Error) {
         alert(error.message)
       } else {
-        alert("画像のアップロードに失敗しました。もう一度お試しください。")
+        alert("Image upload failed. Please try again.")
       }
     }
 
-    // ファイル入力をクリア
+    // Clear file input
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }

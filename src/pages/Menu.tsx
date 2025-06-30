@@ -9,7 +9,7 @@ import CheckItem from "../components/CheckItem"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 import MenuItem from "../components/MenuItem"
-// 統合型定義システムから宗教的制約情報をインポート
+// Import religious restriction information from unified type definition system
 import { religiousRestrictionList } from "../data/religiousRestrictions"
 import { getMenuCollection } from "../services/firestoreService"
 import { getMenuCollectionId } from "../utils/localStorage"
@@ -27,11 +27,11 @@ function Menu() {
   const location = useLocation()
   const state = location.state as LocationState
 
-  // Dietary Restrictions state - 宗教的制約のみ
+  // Dietary Restrictions state - religious restrictions only
   const [dietaryRestrictions, setDietaryRestrictions] = useState<Record<string, boolean>>(() => {
     const initialState: Record<string, boolean> = {}
 
-    // 宗教的制約項目を追加
+    // Add religious restriction items
     for (const restriction of religiousRestrictionList) {
       initialState[restriction.name] = false
     }
@@ -43,44 +43,44 @@ function Menu() {
   const [menuItems, setMenuItems] = useState<MenuItemType[]>([])
   const [isLoadingMenu, setIsLoadingMenu] = useState(true)
 
-  // アップロードされた画像の情報をログ出力
+  // Log uploaded image information
   useEffect(() => {
     if (state?.uploadedImage) {
-      console.log("アップロードされた画像URL:", state.uploadedImage)
-      console.log("アップロードされた画像パス:", state.imagePath)
+      console.log("Uploaded image URL:", state.uploadedImage)
+      console.log("Uploaded image path:", state.imagePath)
     }
   }, [state])
 
-  // メニューデータを取得
+  // Fetch menu data
   useEffect(() => {
     const fetchMenuData = async () => {
       try {
         setIsLoadingMenu(true)
 
-        // ローカルストレージからメニューコレクションIDを取得
+        // Get menu collection ID from localStorage
         const documentId = getMenuCollectionId() || ""
 
         console.log("documentId:", documentId)
 
         if (!documentId) {
-          console.warn("メニューコレクションIDが見つかりません")
+          console.warn("Menu collection ID not found")
           setMenuItems([])
           return
         }
 
-        // 新しいFirestoreサービスを使用してメニューコレクションを取得
+        // Use new Firestore service to get menu collection
         const menuCollection = await getMenuCollection(documentId)
-        console.log("取得したメニューコレクション:", menuCollection)
+        console.log("Retrieved menu collection:", menuCollection)
 
         if (menuCollection && menuCollection.menus.length > 0) {
           setMenuItems(menuCollection.menus)
-          console.log("取得したメニューアイテム:", menuCollection.menus)
+          console.log("Retrieved menu items:", menuCollection.menus)
         } else {
-          console.warn("メニューアイテムが見つかりません")
+          console.warn("Menu items not found")
           setMenuItems([])
         }
       } catch (error) {
-        console.error("メニューデータの取得に失敗しました:", error)
+        console.error("Failed to fetch menu data:", error)
         setMenuItems([])
       } finally {
         setIsLoadingMenu(false)
@@ -88,24 +88,24 @@ function Menu() {
     }
 
     fetchMenuData()
-  }, [state?.menuCollectionId])
+  }, [])
 
-  // チェックされた宗教的制約に基づいてメニューをフィルタリング
+  // Filter menu items based on checked religious restrictions
   const filteredMenuItems = useMemo(() => {
-    // チェックされた宗教的制約のIDリストを取得
+    // Get list of checked religious restriction IDs
     const selectedRestrictionIds = Object.entries(dietaryRestrictions)
       .filter(([_, checked]) => checked)
       .map(([restrictionName, _]) => religiousRestrictionNameToIdMap[restrictionName])
       .filter((id) => id !== undefined)
 
-    console.log("選択された宗教的制約ID:", selectedRestrictionIds)
+    console.log("Selected religious restriction IDs:", selectedRestrictionIds)
 
-    // 選択された制約がない場合は全てのメニューを表示
+    // If no restrictions are selected, show all menus
     if (selectedRestrictionIds.length === 0) {
       return menuItems
     }
 
-    // 選択された宗教的制約を含むメニューを除外
+    // Exclude menus containing selected religious restrictions
     const filtered = menuItems.filter((item) => {
       const hasRestrictedIngredients = item.dietary_restriction_ids.some((id) =>
         selectedRestrictionIds.includes(id)
@@ -113,8 +113,8 @@ function Menu() {
       return !hasRestrictedIngredients
     })
 
-    console.log("フィルタリング前のメニュー数:", menuItems.length)
-    console.log("フィルタリング後のメニュー数:", filtered.length)
+    console.log("Menu items before filtering:", menuItems.length)
+    console.log("Menu items after filtering:", filtered.length)
 
     return filtered
   }, [menuItems, dietaryRestrictions])
@@ -134,7 +134,7 @@ function Menu() {
           {/* Header */}
           <Header title="Menu Analysis" />
 
-          {/* アップロードされた画像が存在する場合の表示（デバッグ用） */}
+          {/* Display uploaded image if present (for debugging) */}
           {state?.uploadedImage && (
             <Box
               sx={{
@@ -156,7 +156,7 @@ function Menu() {
                   marginBottom: "8px",
                 }}
               >
-                アップロードされた画像：
+                Uploaded Image:
               </Typography>
               <Box
                 component="img"
@@ -172,7 +172,7 @@ function Menu() {
                 }}
               />
 
-              {/* 画像詳細情報 */}
+              {/* Image details */}
               <Box
                 sx={{
                   display: "flex",
@@ -188,7 +188,7 @@ function Menu() {
                     wordBreak: "break-all",
                   }}
                 >
-                  <strong>パス:</strong> {state.imagePath}
+                  <strong>Path:</strong> {state.imagePath}
                 </Typography>
 
                 {state.fileSize && (
@@ -199,7 +199,7 @@ function Menu() {
                       color: "#666",
                     }}
                   >
-                    <strong>ファイルサイズ:</strong> {(state.fileSize / 1024 / 1024).toFixed(2)} MB
+                    <strong>File Size:</strong> {(state.fileSize / 1024 / 1024).toFixed(2)} MB
                   </Typography>
                 )}
 
@@ -211,7 +211,7 @@ function Menu() {
                       color: "#666",
                     }}
                   >
-                    <strong>ファイル形式:</strong> {state.contentType}
+                    <strong>File Type:</strong> {state.contentType}
                   </Typography>
                 )}
 
@@ -236,7 +236,7 @@ function Menu() {
                     fontStyle: "italic",
                   }}
                 >
-                  ※ この画像がOCRとAI解析の対象となります
+                  ※ This image is subject to OCR and AI analysis
                 </Typography>
               </Box>
             </Box>
@@ -317,7 +317,7 @@ function Menu() {
                 width: "100%",
               }}
             >
-              Menu Items {isLoadingMenu ? "(読み込み中...)" : `(${filteredMenuItems.length}件)`}
+              Menu Items {isLoadingMenu ? "(Loading...)" : `(${filteredMenuItems.length} items)`}
             </Typography>
           </Box>
 
@@ -344,18 +344,23 @@ function Menu() {
                     color: "#666",
                   }}
                 >
-                  メニューデータを読み込み中...
+                  Loading menu data...
                 </Typography>
               </Box>
             ) : filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item) => (
-                <MenuItem
-                  key={item.name}
-                  title={item.name}
-                  ingredients={item.ingredients.join(", ")}
-                  imageSrc={menuItemImg}
-                />
-              ))
+              filteredMenuItems.map((item) => {
+                // Get the index in the original menu array
+                const originalIndex = menuItems.findIndex((menuItem) => menuItem.name === item.name)
+                return (
+                  <MenuItem
+                    key={item.name}
+                    title={item.name}
+                    ingredients={item.ingredients.join(", ")}
+                    imageSrc={menuItemImg}
+                    index={originalIndex}
+                  />
+                )
+              })
             ) : menuItems.length > 0 ? (
               <Box
                 sx={{
@@ -375,7 +380,7 @@ function Menu() {
                     marginBottom: "8px",
                   }}
                 >
-                  選択された宗教的制約に適合するメニューが見つかりませんでした
+                  No menu items found that match your selected religious restrictions
                 </Typography>
                 <Typography
                   sx={{
@@ -385,7 +390,7 @@ function Menu() {
                     textAlign: "center",
                   }}
                 >
-                  フィルター条件を変更してください
+                  Please change your filter conditions
                 </Typography>
               </Box>
             ) : (
@@ -404,7 +409,7 @@ function Menu() {
                     color: "#666",
                   }}
                 >
-                  メニューデータが見つかりませんでした
+                  No menu data found
                 </Typography>
               </Box>
             )}
